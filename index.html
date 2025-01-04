@@ -8,50 +8,58 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            background-color: #f0f0f0; /* 淡灰色背景 */
-            color: #333; /* 深灰色文字 */
+            background-color: #f7f7f7; /* 更柔和的背景 */
+            color: #333;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
             min-height: 100vh;
         }
 
         .container {
-            background-color: #fff; /* 白色容器 */
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
-            padding: 20px;
-            width: 80%;
+            padding: 30px;
+            width: 90%;
             max-width: 800px;
+            margin-top: 20px;
         }
 
         #top-time-bar {
-            background-color: #eee; /* 浅灰色时间栏背景 */
-            padding: 10px;
+            background-color: #eee;
+            padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
             position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         #current-time {
-            text-align: center;
-            font-size: 1.5em;
-            margin-bottom: 5px;
+            font-size: 1.8em;
+            font-weight: bold;
         }
 
         #schedule-container {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            height: 40px; /* 稍微增加高度 */
+            margin-top: 5px;
             display: flex;
             align-items: center;
-            height: 30px; /* 调整高度 */
         }
 
         .schedule-item {
-            background-color: #ccc; /* 默认日程项颜色 */
+            background-color: #ccc;
             color: #fff;
-            padding: 5px 10px;
-            border-radius: 3px;
+            padding: 8px 12px;
+            border-radius: 5px;
             margin-right: 5px;
-            font-size: 0.8em;
+            font-size: 0.9em;
             cursor: grab;
             position: absolute;
             top: 0;
@@ -59,71 +67,99 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         .schedule-item.late {
-            background-color: #f00; /* 超出睡眠时间颜色 */
+            background-color: #f44336;
         }
 
         #focus-timer {
             background-color: #eee;
-            padding: 20px;
+            padding: 25px;
             border-radius: 5px;
         }
 
         #focus-timer h2 {
             text-align: center;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            font-size: 1.5em;
         }
 
         .input-group {
-            margin-bottom: 10px;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
         }
 
         .input-group label {
-            margin-right: 10px;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .input-group input[type="number"] {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 60px;
+            text-align: center;
         }
 
         #timer-display {
             text-align: center;
-            font-size: 2em;
-            margin-bottom: 15px;
+            font-size: 3em;
+            font-weight: bold;
+            margin-bottom: 20px;
         }
 
         #progress-bar-container {
             background-color: #ddd;
-            border-radius: 5px;
-            height: 20px;
-            margin-bottom: 15px;
+            border-radius: 10px;
+            height: 25px;
+            margin-bottom: 20px;
             overflow: hidden;
         }
 
         #progress-bar {
-            background-color: #4CAF50; /* 进度条颜色 */
+            background-color: #4CAF50;
             height: 100%;
             width: 0%;
             transition: width 0.1s linear;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.8em;
         }
 
         #progress-bar.overtime {
-            background-color: #f44336; /* 超时颜色 */
+            background-color: #f44336;
         }
 
         #start-stop-button {
             display: block;
             margin: 0 auto;
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: none;
             background-color: #4CAF50;
             color: white;
             border-radius: 5px;
             cursor: pointer;
+            font-size: 1.1em;
+            transition: background-color 0.3s ease;
+        }
+
+        #start-stop-button:hover {
+            background-color: #43A047;
         }
 
         #start-stop-button.running {
             background-color: #f44336;
+        }
+
+        #start-stop-button.running:hover {
+            background-color: #d32f2f;
         }
     </style>
 </head>
@@ -163,23 +199,23 @@
             const startStopButton = document.getElementById('start-stop-button');
 
             let now;
-            let schedule = []; // 存储日程安排
-            let latestSleepTime; // 最晚睡眠时间
+            let schedule = [];
+            let latestSleepTime;
             let isDragging = false;
             let draggedItem = null;
             let dragOffsetX;
 
-            // 默认日程设置 (可以根据需要修改)
+            // 默认日程设置
             const defaultSchedule = [
                 { start: '08:00', end: '09:00', label: '起床/早餐' },
-                { start: '09:00', end: '12:00', label: '工作/学习' },
+                { start: '09:00', end: '12:00', label: '专注工作' },
                 { start: '12:00', end: '13:00', label: '午餐' },
-                { start: '13:00', end: '18:00', label: '工作/学习' },
+                { start: '13:00', end: '17:00', label: '项目开发' },
+                { start: '17:00', end: '18:00', label: '健身' },
                 { start: '18:00', end: '19:00', label: '晚餐' },
-                { start: '19:00', end: '22:00', label: '休闲' },
+                { start: '19:00', end: '22:30', label: '学习/休闲' },
             ];
 
-            // 默认最晚睡眠时间
             latestSleepTime = '23:00';
 
             // 专注定时器相关变量
@@ -198,7 +234,7 @@
 
             function renderSchedule() {
                 scheduleContainer.innerHTML = '';
-                const containerWidth = scheduleContainer.offsetWidth;
+                const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                 const minutesInDay = 24 * 60;
 
                 schedule.forEach(item => {
@@ -214,16 +250,14 @@
                     scheduleItem.textContent = item.label;
                     scheduleItem.style.left = `${startPosition}px`;
                     scheduleItem.style.width = `${width}px`;
-                    scheduleItem.draggable = true; // 允许拖动
+                    scheduleItem.draggable = true;
 
-                    // 检查是否超出最晚睡眠时间
                     if (item.end > latestSleepTime) {
                         scheduleItem.classList.add('late');
                     }
 
                     scheduleContainer.appendChild(scheduleItem);
 
-                    // 添加拖动事件监听器
                     scheduleItem.addEventListener('mousedown', (e) => {
                         isDragging = true;
                         draggedItem = e.target;
@@ -241,7 +275,7 @@
                     const startTimeMinutes = timeToMinutes(item.start);
                     const endTimeMinutes = timeToMinutes(item.end);
                     if (nowMinutes >= startTimeMinutes && nowMinutes < endTimeMinutes) {
-                        scheduleItems[index].classList.add('active'); // 可以添加 .active CSS 样式来突出显示
+                        scheduleItems[index].classList.add('active');
                     }
                 });
             }
@@ -284,6 +318,7 @@
                 startStopButton.classList.remove('running');
                 progressBar.style.width = '0%';
                 progressBar.classList.remove('overtime');
+                progressBar.textContent = '';
             }
 
             function startInterval() {
@@ -296,12 +331,10 @@
                         clearInterval(focusInterval);
                         progressBar.classList.add('overtime');
                         if (isFocusing) {
-                            // 可以添加专注结束后的操作，例如播放提示音
                             alert('专注时间结束！');
                             startBreakTimer();
                         } else {
                             alert('休息时间结束！');
-                            // 可以添加休息结束后的操作
                         }
                     }
                 }, 1000);
@@ -316,6 +349,9 @@
             function updateProgressBar() {
                 const progress = Math.max(0, (totalFocusTime - remainingTime) / totalFocusTime) * 100;
                 progressBar.style.width = `${progress}%`;
+                const displayedMinutes = String(Math.floor(totalFocusTime / 60)).padStart(2, '0');
+                const displayedSeconds = String(totalFocusTime % 60).padStart(2, '0');
+                progressBar.textContent = `${displayedMinutes}:${displayedSeconds}`;
             }
 
             startStopButton.addEventListener('click', () => {
@@ -332,17 +368,16 @@
 
             // 实时更新时间
             updateCurrentTime();
-            setInterval(updateCurrentTime, 60000); // 每分钟更新一次
+            setInterval(updateCurrentTime, 60000);
 
             // 拖动事件
             document.addEventListener('mousemove', (e) => {
                 if (!isDragging) return;
                 if (!draggedItem) return;
 
-                const containerRect = scheduleContainer.getBoundingClientRect();
+                const containerRect = document.getElementById('top-time-bar').getBoundingClientRect();
                 let newLeft = e.clientX - containerRect.left - dragOffsetX;
 
-                // 限制拖动范围
                 if (newLeft < 0) {
                     newLeft = 0;
                 }
@@ -351,26 +386,24 @@
                 }
 
                 draggedItem.style.left = `${newLeft}px`;
-                // 在这里可以实时更新日程数据，但为了性能，通常在 mouseup 时更新
             });
 
             document.addEventListener('mouseup', () => {
                 if (isDragging && draggedItem) {
-                    const containerWidth = scheduleContainer.offsetWidth;
+                    const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                     const minutesInDay = 24 * 60;
                     const leftPercentage = draggedItem.offsetLeft / containerWidth;
                     const widthPercentage = draggedItem.offsetWidth / containerWidth;
 
-                    const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay);
-                    const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay);
+                    const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10; // 以 10 分钟为单位
+                    const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
 
-                    // 更新日程数据
                     const index = Array.from(scheduleContainer.children).indexOf(draggedItem);
                     if (index !== -1) {
                         schedule[index].start = minutesToTime(newStartTimeMinutes);
                         schedule[index].end = minutesToTime(newEndTimeMinutes);
-                        schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start)); // 重新排序
-                        renderSchedule(); // 重新渲染日程
+                        schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+                        renderSchedule();
                     }
 
                     isDragging = false;
