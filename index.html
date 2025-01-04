@@ -220,33 +220,40 @@
         }
 
         #progress-bar-container {
-            background-color: #ccc;
-            border-radius: 10px;
+             background-color: #ccc;
+             border-radius: 10px;
             height: 25px;
-            margin-bottom: 20px;
+             margin-bottom: 20px;
             overflow: hidden;
             width: 100%;
+             position: relative;
         }
 
         #progress-bar {
             background-color: #888;
-            height: 100%;
-            width: 0%;
-            transition: width 0.05s linear;
+             height: 100%;
+             width: 0%;
+            transition: width 0.05s linear, right 0.05s linear;
             border-radius: 10px;
             display: flex;
-            align-items: center;
+             align-items: center;
             justify-content: flex-start;
             color: white;
             font-size: 0.8em;
-            white-space: nowrap;
-            padding: 0 10px;
-            box-sizing: border-box;
+             white-space: nowrap;
+             padding: 0 10px;
+             box-sizing: border-box;
+            position: absolute;
+           left: 0;
+
         }
 
         #progress-bar.overtime {
             justify-content: flex-end;
+            left: auto;
+            right: 0;
         }
+
 
         #start-stop-button {
             padding: 12px 25px;
@@ -321,8 +328,8 @@
     <div class="container">
         <div id="top-time-bar">
             <div id="current-time"></div>
-           <div id="sleep-time-display"></div>
-             <div id="day-progress-container">
+             <div id="sleep-time-display"></div>
+            <div id="day-progress-container">
                 <div id="day-progress"></div>
                 <div id="sleep-time-indicator">
                 </div>
@@ -361,7 +368,7 @@
                     <input type="range" id="break-duration-slider" min="1" max="60" value="5" class="duration-slider">
                     <input type="number" id="break-duration" min="1" max="60" value="5">
                 </div>
-                <div class="duration-control">
+                 <div class="duration-control">
                     <label for="break-multiplier-slider">休息倍率:</label>
                     <input type="range" id="break-multiplier-slider" min="0.1" max="5" value="1" step="0.1" class="duration-slider">
                     <input type="number" id="break-multiplier" min="0.1" max="5" value="1" step="0.1">
@@ -370,6 +377,18 @@
                     <label for="transition-multiplier-slider">过渡倍率:</label>
                     <input type="range" id="transition-multiplier-slider" min="1" max="10" value="5" step="1" class="duration-slider">
                     <input type="number" id="transition-multiplier" min="1" max="10" value="5" step="1">
+                </div>
+                 <div class="duration-control">
+                    <label for="quadratic-a">系数a:</label>
+                    <input type="number" id="quadratic-a"  value="0.01" step="0.01">
+                </div>
+                  <div class="duration-control">
+                    <label for="quadratic-b">系数b:</label>
+                    <input type="number" id="quadratic-b"  value="0.1" step="0.1">
+                </div>
+                  <div class="duration-control">
+                    <label for="quadratic-c">系数c:</label>
+                    <input type="number" id="quadratic-c" value="1" step="0.1">
                 </div>
             </div>
             <div id="timer-display">00:00</div>
@@ -385,7 +404,7 @@
         </div>
     </div>
 
-    <script>
+     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const currentTimeElement = document.getElementById('current-time');
             const sleepTimeDisplay = document.getElementById('sleep-time-display');
@@ -417,11 +436,13 @@
             const breakDurationInput = document.getElementById('break-duration');
             const focusDurationSlider = document.getElementById('focus-duration-slider');
             const breakDurationSlider = document.getElementById('break-duration-slider');
-            const breakMultiplierInput = document.getElementById('break-multiplier');
+             const breakMultiplierInput = document.getElementById('break-multiplier');
             const breakMultiplierSlider = document.getElementById('break-multiplier-slider');
-              const transitionMultiplierInput = document.getElementById('transition-multiplier');
+            const transitionMultiplierInput = document.getElementById('transition-multiplier');
               const transitionMultiplierSlider = document.getElementById('transition-multiplier-slider');
-
+             const quadraticAInput = document.getElementById('quadratic-a');
+             const quadraticBInput = document.getElementById('quadratic-b');
+              const quadraticCInput = document.getElementById('quadratic-c');
 
 
             let now;
@@ -447,6 +468,9 @@
             let baseBreakDuration;
             let breakTimeMultiplier = parseFloat(localStorage.getItem('breakTimeMultiplier')) || 1;
              let transitionMultiplier = parseInt(localStorage.getItem('transitionMultiplier')) || 5;
+             let quadraticA = parseFloat(localStorage.getItem('quadraticA')) || 0.01;
+            let quadraticB = parseFloat(localStorage.getItem('quadraticB')) || 0.1;
+            let quadraticC = parseFloat(localStorage.getItem('quadraticC')) || 1;
             let settingsLocked = false;
 
 
@@ -607,9 +631,9 @@
                 updateProgressBar();
             }
 
-            function updateTimerDisplay() {
+             function updateTimerDisplay() {
                 if (isFocusing && !isPaused) {
-                    const elapsedMilliseconds = Date.now() - focusStartTime;
+                     const elapsedMilliseconds = Date.now() - focusStartTime;
                     remainingTime = totalFocusTime - Math.floor(elapsedMilliseconds / 1000);
 
                     if (remainingTime <= 0) {
@@ -619,10 +643,10 @@
                     let displaySeconds = Math.abs(remainingTime);
                     const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
                     const seconds = String(displaySeconds % 60).padStart(2, '0');
-                    timerDisplay.textContent = isOvertime ? `-${minutes}:${seconds}` : `${minutes}:${seconds}`;
+                     timerDisplay.textContent = isOvertime ? `-${minutes}:${seconds}` : `${minutes}:${seconds}`;
                     updateProgressBar();
                 } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
-                    const elapsedBreakMilliseconds = Date.now() - breakStartTime;
+                   const elapsedBreakMilliseconds = Date.now() - breakStartTime;
                     const displayedBreakSeconds = Math.ceil(remainingBreakTime / 1000 - elapsedBreakMilliseconds / 1000);
                     if (displayedBreakSeconds <= 0) {
                         clearInterval(breakInterval);
@@ -632,38 +656,41 @@
                     }
                     const minutes = String(Math.floor(displayedBreakSeconds / 60)).padStart(2, '0');
                     const seconds = String(displayedBreakSeconds % 60).padStart(2, '0');
-                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                     timerDisplay.textContent = `${minutes}:${seconds}`;
                     updateProgressBar();
                 }
             }
 
-            function updateProgressBar() {
-                if (isFocusing) {
-                    const elapsedMilliseconds = Date.now() - focusStartTime;
+             function updateProgressBar() {
+                  if (isFocusing) {
+                     const elapsedMilliseconds = Date.now() - focusStartTime;
                     let progress;
                      if (!isOvertime) {
                         progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
                          progressBar.classList.remove('overtime');
                         progressBar.style.justifyContent = 'flex-start';
-                        progressBar.style.width = `${progress}%`;
+                         progressBar.style.width = `${progress}%`;
                     } else {
-                         const overtimeProgress = Math.min(1, (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000)) * 100;
-                         progressBar.classList.add('overtime');
-                         progressBar.style.justifyContent = 'flex-end';
+                        const overtimeProgress = Math.min(1, (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000)) * 100;
+
+                        progressBar.classList.add('overtime');
+                        progressBar.style.justifyContent = 'flex-end';
                          progressBar.style.width = `${overtimeProgress}%`;
+
                     }
-                } else if (!isFocusing && remainingBreakTime > 0) {
+                }  else if (!isFocusing && remainingBreakTime > 0) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
                     const progress = Math.min(1, elapsedBreakMilliseconds / totalBreakTime) * 100;
                     progressBar.classList.remove('overtime');
                     progressBar.style.justifyContent = 'flex-start';
-                    progressBar.style.width = `${progress}%`;
+                     progressBar.style.width = `${progress}%`;
                 } else {
                     progressBar.style.width = '0%';
                     progressBar.classList.remove('overtime');
-                     progressBar.style.justifyContent = 'flex-start';
+                    progressBar.style.justifyContent = 'flex-start';
                 }
             }
+
 
             startStopButton.addEventListener('click', () => {
                 if (isFocusing) {
@@ -685,14 +712,17 @@
                 isPaused = false;
 
                 let breakDuration = baseBreakDuration;
-
-                if (earlyBreak && remainingTime > 0) {
-                    breakDuration = Math.max(0, baseBreakDuration - (totalFocusTime - remainingTime) * 1000);
-                } else if (isOvertime) {
+                 let overtimeMinutes = 0;
+                  if (earlyBreak && remainingTime > 0) {
+                   breakDuration = Math.max(0, baseBreakDuration - (totalFocusTime - remainingTime) * 1000);
+                  } else if (isOvertime) {
                     const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
-                    const overtimeRatio = overtimeMilliseconds / (totalFocusTime * 1000);
-                     breakDuration = baseBreakDuration * (1 + overtimeRatio * breakTimeMultiplier);
-                }
+                     overtimeMinutes = Math.ceil(overtimeMilliseconds / (60 * 1000));
+
+                    breakDuration = baseBreakDuration * (quadraticA * overtimeMinutes * overtimeMinutes + quadraticB * overtimeMinutes + quadraticC);
+                  }
+
+
 
                 totalBreakTime = breakDuration;
                 remainingBreakTime = breakDuration;
@@ -790,7 +820,7 @@
             function updateSleepTimeFromInput() {
                 const hours = parseInt(sleepHoursInput.value);
                 const minutes = parseInt(sleepMinutesInput.value);
-                if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+                if (                    hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
                     latestSleepTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
                     sleepTimeInput.value = latestSleepTime;
                     localStorage.setItem('sleepTime', latestSleepTime);
@@ -811,7 +841,6 @@
                     focusSettingsDetailed.style.display = 'flex';
                 }
             });
-
 
             focusDurationSlider.addEventListener('input', () => {
                 focusDurationInput.value = focusDurationSlider.value;
@@ -877,11 +906,29 @@
 
             });
 
+            quadraticAInput.addEventListener('change', () => {
+                quadraticA = parseFloat(quadraticAInput.value);
+                localStorage.setItem('quadraticA', quadraticA);
+            });
+
+            quadraticBInput.addEventListener('change', () => {
+                quadraticB = parseFloat(quadraticBInput.value);
+                localStorage.setItem('quadraticB', quadraticB);
+            });
+
+            quadraticCInput.addEventListener('change', () => {
+                quadraticC = parseFloat(quadraticCInput.value);
+                localStorage.setItem('quadraticC', quadraticC);
+            });
 
              transitionMultiplierInput.value = transitionMultiplier;
             transitionMultiplierSlider.value = transitionMultiplier;
            breakMultiplierInput.value = breakTimeMultiplier;
             breakMultiplierSlider.value = breakTimeMultiplier;
+            quadraticAInput.value = quadraticA;
+            quadraticBInput.value = quadraticB;
+            quadraticCInput.value = quadraticC;
+
             // 初始渲染
             renderSchedule();
             updateCurrentTime();
