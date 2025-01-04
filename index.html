@@ -8,7 +8,7 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            background-color: #f7f7f7;
+            background-color: #fff;
             color: #333;
             display: flex;
             flex-direction: column;
@@ -21,7 +21,7 @@
         }
 
         .container {
-            background-color: #fff;
+            background-color: #f0f0f0;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             padding: 30px;
@@ -31,7 +31,7 @@
         }
 
         #top-time-bar {
-            background-color: #eee;
+            background-color: #e0e0e0;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -40,6 +40,7 @@
             align-items: center;
             justify-content: center;
             overflow: hidden;
+            transition: background-color 0.3s ease;
         }
 
         #current-time {
@@ -60,11 +61,16 @@
             align-items: center;
             overflow-x: auto;
             padding: 0 10px;
-            transition: opacity 0.3s ease;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #schedule-container.show {
+            opacity: 1;
         }
 
         .schedule-item {
-            background-color: #ddd;
+            background-color: #ccc;
             color: #555;
             padding: 8px 12px;
             border-radius: 5px;
@@ -79,7 +85,7 @@
             flex-shrink: 0;
             position: absolute;
             top: 0;
-            transition: left 0.2s ease-out, width 0.2s ease-out, background-color 0.3s ease;
+            transition: left 0.2s ease-out, width 0.2s ease-out, background-color 0.3s ease, color 0.3s ease;
         }
 
         .schedule-item.late {
@@ -93,26 +99,19 @@
         }
 
         #focus-timer {
-            background-color: #eee;
+            background-color: #e0e0e0;
             padding: 25px;
             border-radius: 5px;
             margin-top: 20px;
             opacity: 0;
             height: 0;
             overflow: hidden;
-            transition: opacity 0.5s ease, height 0.5s ease;
+            transition: opacity 0.5s ease, height 0.5s ease, background-color 0.3s ease;
         }
 
         #focus-timer.show {
             opacity: 1;
             height: auto;
-        }
-
-        #focus-timer h2 {
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 1.5em;
-            color: #555;
         }
 
         #timer-display {
@@ -143,14 +142,18 @@
             border-radius: 10px;
         }
 
+        #progress-bar.overtime {
+            background-color: #b35f5f;
+        }
+
         #progress-bar-sleep {
             position: absolute;
             top: 0;
             height: 100%;
-            background-color: #ccc;
+            background-color: #bbb;
             opacity: 0.6;
             pointer-events: none;
-            transition: width 0.3s ease;
+            transition: width 0.3s ease, background-color 0.3s ease;
         }
 
         .controls {
@@ -167,7 +170,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 1.1em;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .control-button:hover {
@@ -195,11 +198,10 @@
         </div>
 
         <div id="focus-timer">
-            <h2>专注时间</h2>
             <div id="timer-display">00:00</div>
             <div class="controls">
                 <button id="start-focus-button" class="control-button">开始专注</button>
-                <button id="start-rest-button" class="control-button hidden">开始休息</button>
+                <button id="start-rest-button" class="control-button hidden">休息</button>
             </div>
         </div>
 
@@ -236,17 +238,18 @@
             let sleepTime = localStorage.getItem('sleepTime') || '23:00';
             latestSleepTime = sleepTime;
 
-            // Default schedule settings
+            // Default schedule settings (can be loaded from local storage later)
             const defaultSchedule = [
-                { start: '08:00', end: '09:00', label: '起床/早餐' },
+                { start: '08:00', end: '09:00', label: '起床' },
                 { start: '09:00', end: '12:00', label: '工作' },
-                { start: '12:00', end: '13:00', label: '午餐' },
+                { start: '12:00', end: '13:00', label: '午休' },
                 { start: '13:00', end: '17:00', label: '工作' },
-                { start: '17:00', end: '18:00', label: '运动' },
+                { start: '17:00', end: '18:00', label: '锻炼' },
                 { start: '18:00', end: '19:00', label: '晚餐' },
                 { start: '19:00', end: '22:30', label: '休闲' },
             ];
             schedule = defaultSchedule;
+            renderSchedule(); // Initial render
 
             function updateCurrentTime() {
                 now = new Date();
@@ -261,6 +264,8 @@
                 scheduleContainer.innerHTML = '';
                 const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                 const minutesInDay = 24 * 60;
+
+                schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
                 schedule.forEach(item => {
                     const startTimeMinutes = timeToMinutes(item.start);
@@ -277,13 +282,20 @@
                     scheduleItem.style.width = `${width}px`;
                     scheduleItem.draggable = true;
 
-                    if (item.end > latestSleepTime) {
+                    if (timeToMinutes(item.end) > timeToMinutes(latestSleepTime)) {
                         scheduleItem.classList.add('late');
+                    } else {
+                        scheduleItem.classList.remove('late');
                     }
 
                     scheduleItem.addEventListener('mousedown', startDrag);
                     scheduleContainer.appendChild(scheduleItem);
                 });
+                if (schedule.length > 0) {
+                    scheduleContainer.classList.add('show');
+                } else {
+                    scheduleContainer.classList.remove('show');
+                }
             }
 
             function highlightCurrentSchedule() {
@@ -316,9 +328,10 @@
                 focusTimerSection.classList.add('show');
                 elapsedFocusTime = 0;
                 focusStartTime = Date.now();
-                startFocusButton.textContent = '专注中...';
+                startFocusButton.textContent = '专注中';
                 startFocusButton.classList.add('running');
                 startRestButton.classList.remove('hidden');
+                progressBar.classList.remove('overtime');
                 updateTimerDisplay();
                 focusInterval = setInterval(updateFocusTimer, 1000);
             }
@@ -327,6 +340,12 @@
                 const nowTime = Date.now();
                 elapsedFocusTime = Math.floor((nowTime - focusStartTime) / 1000);
                 updateTimerDisplay();
+                const initialFocusTime = 25 * 60; // Example initial focus time
+                if (elapsedFocusTime > initialFocusTime) {
+                    progressBar.classList.add('overtime');
+                } else {
+                    progressBar.classList.remove('overtime');
+                }
             }
 
             function startRest() {
@@ -335,13 +354,7 @@
                 startFocusButton.textContent = '开始专注';
                 startFocusButton.classList.remove('running');
                 startRestButton.classList.add('hidden');
-
-                const restDurationSeconds = Math.min(1800, Math.max(300, Math.floor(elapsedFocusTime / 5)));
-                const restMinutes = String(Math.floor(restDurationSeconds / 60)).padStart(2, '0');
-                const restSeconds = String(restDurationSeconds % 60).padStart(2, '0');
-                timerDisplay.textContent = `${restMinutes}:${restSeconds}`;
-                progressBar.style.width = '100%';
-                alert('专注结束，建议休息片刻！');
+                progressBar.classList.remove('overtime');
                 focusTimerSection.classList.remove('show');
             }
 
@@ -349,11 +362,16 @@
                 const minutes = String(Math.floor(elapsedFocusTime / 60)).padStart(2, '0');
                 const seconds = String(elapsedFocusTime % 60).padStart(2, '0');
                 timerDisplay.textContent = `${minutes}:${seconds}`;
+                const initialFocusTime = 25 * 60; // Example initial focus time for progress
+                const progress = initialFocusTime > 0 ? Math.min(1, elapsedFocusTime / initialFocusTime) * 100 : 0;
+                progressBar.style.width = `${progress}%`;
             }
 
             startFocusButton.addEventListener('click', () => {
                 if (!isFocusing) {
                     startFocus();
+                } else {
+                    startRest(); // Allow stopping focus by clicking start again
                 }
             });
 
@@ -436,7 +454,6 @@
             }
 
             // Initialization
-            renderSchedule();
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
         });
