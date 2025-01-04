@@ -45,7 +45,188 @@
             </div>
         </section>
     </div>
-    <script src="script.js"></script>
-    <script src="timer.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Cookie 工具函数 --- (确保与 script.js 中的一致)
+            function setCookie(name, value, days) {
+                const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+            }
+
+            function getCookie(name) {
+                const cookies = document.cookie.split('; ').find(cookie => cookie.startsWith(name + '='));
+                return cookies ? decodeURIComponent(cookies.split('=')[1]) : null;
+            }
+
+            // --- 每日时间设置 ---
+            const timeSettingsForm = document.getElementById('time-settings');
+            const wakeUpTimeInput = document.getElementById('wake-up-time');
+            const sleepTimeInput = document.getElementById('sleep-time');
+            const timeBlocksContainer = document.getElementById('time-blocks-container');
+            const addTimeBlockButton = document.getElementById('add-time-block');
+
+            function loadDailySettings() {
+                wakeUpTimeInput.value = getCookie('wakeUpTime') || '07:00';
+                sleepTimeInput.value = getCookie('sleepTime') || '23:00';
+                renderCustomTimeBlockForms();
+            }
+
+            function saveDailySettings() {
+                setCookie('wakeUpTime', wakeUpTimeInput.value, 30);
+                setCookie('sleepTime', sleepTimeInput.value, 30);
+            }
+
+            timeSettingsForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                saveDailySettings();
+            });
+
+            let customTimeBlocks = JSON.parse(getCookie('customTimeBlocks') || '[]');
+
+            function renderCustomTimeBlockForms() {
+                timeBlocksContainer.innerHTML = '';
+                customTimeBlocks.forEach(block => {
+                    const form = document.createElement('div');
+                    form.classList.add('custom-time-block-form');
+                    form.innerHTML = `
+                        <input type="time" value="${block.startTime}" data-id="${block.id}" data-field="startTime">
+                        <input type="time" value="${block.endTime}" data-id="${block.id}" data-field="endTime">
+                        <input type="color" value="${block.color}" data-id="${block.id}" data-field="color">
+                        <button type="button" class="delete-time-block" data-id="${block.id}">删除</button>
+                    `;
+                    timeBlocksContainer.appendChild(form);
+                });
+            }
+
+            addTimeBlockButton.addEventListener('click', () => {
+                const newBlock = {
+                    id: Date.now(),
+                    startTime: '09:00',
+                    endTime: '10:00',
+                    color: '#aaffaa'
+                };
+                customTimeBlocks.push(newBlock);
+                setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                renderCustomTimeBlockForms();
+            });
+
+            timeBlocksContainer.addEventListener('change', (e) => {
+                if (e.target.matches('input[type="time"], input[type="color"]')) {
+                    const blockId = parseInt(e.target.dataset.id);
+                    const field = e.target.dataset.field;
+                    const value = e.target.value;
+                    const blockIndex = customTimeBlocks.findIndex(b => b.id === blockId);
+                    if (blockIndex > -1) {
+                        customTimeBlocks[blockIndex][field] = value;
+                        setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                    }
+                }
+            });
+
+            timeBlocksContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-time-block')) {
+                    const blockIdToDelete = parseInt(e.target.dataset.id);
+                    customTimeBlocks = customTimeBlocks.filter(block => block.id !== blockIdToDelete);
+                    setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                    renderCustomTimeBlockForms();
+                }
+            });
+
+            // --- 专注模式设置 ---
+            const timerConfigsContainer = document.getElementById('timer-configs-container');
+            const addTimerConfigButton = document.getElementById('add-timer-config');
+
+            let timerConfigs = JSON.parse(getCookie('timerConfigs') || '[]');
+
+            function renderTimerConfigForms() {
+                timerConfigsContainer.innerHTML = '';
+                timerConfigs.forEach(config => {
+                    const form = document.createElement('div');
+                    form.classList.add('timer-config-form');
+                    form.innerHTML = `
+                        <input type="hidden" data-id="${config.id}">
+                        <div class="form-group">
+                            <label>名称</label>
+                            <input type="text" value="${config.name}" data-field="name">
+                        </div>
+                        <div class="form-group">
+                            <label>类型</label>
+                            <select data-field="type">
+                                <option value="timer" ${config.type === 'timer' ? 'selected' : ''}>定时器</option>
+                                <option value="pomodoro" ${config.type === 'pomodoro' ? 'selected' : ''}>番茄钟</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>时长 (分钟)</label>
+                            <input type="number" value="${config.duration || ''}" data-field="duration">
+                        </div>
+                        <div class="form-group" style="display: ${config.type === 'pomodoro' ? 'block' : 'none'};">
+                            <label>专注时长 (分钟)</label>
+                            <input type="number" value="${config.focusDuration || ''}" data-field="focusDuration">
+                        </div>
+                        <div class="form-group" style="display: ${config.type === 'pomodoro' ? 'block' : 'none'};">
+                            <label>休息时长 (分钟)</label>
+                            <input type="number" value="${config.breakDuration || ''}" data-field="breakDuration">
+                        </div>
+                        <button type="button" class="delete-timer-config" data-id="${config.id}">删除</button>
+                    `;
+                    timerConfigsContainer.appendChild(form);
+                });
+            }
+
+            addTimerConfigButton.addEventListener('click', () => {
+                const newConfig = {
+                    id: Date.now(),
+                    name: '新的专注模式',
+                    type: 'timer',
+                    duration: 25,
+                    focusDuration: 25,
+                    breakDuration: 5
+                };
+                timerConfigs.push(newConfig);
+                setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+                renderTimerConfigForms();
+            });
+
+            timerConfigsContainer.addEventListener('change', (e) => {
+                const target = e.target;
+                if (target.matches('input, select')) {
+                    const configForm = target.closest('.timer-config-form');
+                    const configId = parseInt(configForm.querySelector('[data-id]').dataset.id);
+                    const field = target.dataset.field;
+                    const value = target.value;
+                    const configIndex = timerConfigs.findIndex(c => c.id === configId);
+                    if (configIndex > -1) {
+                        timerConfigs[configIndex][field] = value;
+                        setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+                    }
+
+                    // 根据类型显示/隐藏番茄钟 specific fields
+                    if (field === 'type') {
+                        const isPomodoro = value === 'pomodoro';
+                        configForm.querySelector('input[data-field="duration"]').closest('.form-group').style.display = isPomodoro ? 'none' : 'block';
+                        configForm.querySelector('input[data-field="focusDuration"]').closest('.form-group').style.display = isPomodoro ? 'block' : 'none';
+                        configForm.querySelector('input[data-field="breakDuration"]').closest('.form-group').style.display = isPomodoro ? 'block' : 'none';
+                    }
+                }
+            });
+
+            timerConfigsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete-timer-config')) {
+                    const configIdToDelete = parseInt(e.target.dataset.id);
+                    timerConfigs = timerConfigs.filter(config => config.id !== configIdToDelete);
+                    setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+                    renderTimerConfigForms();
+                }
+            });
+
+            function init() {
+                loadDailySettings();
+                renderTimerConfigForms();
+            }
+
+            init();
+        });
+    </script>
 </body>
 </html>
