@@ -8,7 +8,7 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            background-color: #f4f4f4; /* 淡灰色背景 */
+            background-color: #f4f4f4;
             color: #333;
             display: flex;
             flex-direction: column;
@@ -27,7 +27,7 @@
         }
 
         #top-time-bar {
-            background-color: #eee; /* 稍亮的灰色 */
+            background-color: #eee;
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -88,7 +88,7 @@
         }
 
         .schedule-item {
-            background-color: #bbb; /* 更柔和的颜色 */
+            background-color: #bbb;
             color: #fff;
             padding: 8px 12px;
             border-radius: 5px;
@@ -104,7 +104,7 @@
         }
 
         .schedule-item.late {
-            background-color: #999; /* 稍暗的颜色 */
+            background-color: #999;
         }
 
         #sleep-time-settings {
@@ -162,7 +162,7 @@
         }
 
         #focus-timer {
-            background-color: #eee; /* 稍亮的灰色 */
+            background-color: #eee;
             padding: 25px;
             border-radius: 5px;
             display: flex;
@@ -213,7 +213,6 @@
             margin-bottom: 20px;
             overflow: hidden;
             width: 100%;
-            position: relative; /* 添加相对定位 */
         }
 
         #progress-bar {
@@ -224,20 +223,16 @@
             border-radius: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* 对齐到左边 */
             color: white;
             font-size: 0.8em;
             white-space: nowrap;
             padding: 0 10px;
             box-sizing: border-box;
-            position: absolute; /* 改为绝对定位 */
-            left: 0; /* 初始位置在左边 */
         }
 
         #progress-bar.overtime {
-            background-color: #555;
-            left: auto; /* 超时后从右边开始 */
-            right: 0;
+            justify-content: flex-end; /* 超时后对齐到右边 */
         }
 
         #start-stop-button {
@@ -417,6 +412,7 @@
             let remainingBreakTime;
             let breakStartTime;
             let totalBreakTime;
+            let baseBreakDuration; // 存储设定的休息时间
 
             function updateCurrentTime() {
                 now = new Date();
@@ -499,6 +495,7 @@
                 isFocusing = true;
                 isPaused = false;
                 isOvertime = false;
+                baseBreakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000; // 设置专注时，初始化基础休息时间
                 const focusTime = parseInt(focusDurationInput.value, 10) * 60;
                 totalFocusTime = focusTime;
                 remainingTime = focusTime;
@@ -509,6 +506,7 @@
                 breakButton.textContent = '休息';
                 updateTimerDisplay();
                 focusInterval = setInterval(updateTimerDisplay, 100);
+                updateProgressBar(); // 立即更新进度条
                 focusSettingsSummary.style.display = 'flex';
                 focusSettingsDetailed.style.display = 'none';
             }
@@ -567,7 +565,7 @@
                     updateProgressBar();
                 } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
-                    const displayedBreakSeconds = Math.ceil(remainingBreakTime - elapsedBreakMilliseconds / 1000);
+                    const displayedBreakSeconds = Math.ceil(remainingBreakTime / 1000 - elapsedBreakMilliseconds / 1000);
                     if (displayedBreakSeconds <= 0) {
                         clearInterval(breakInterval);
                         timerDisplay.textContent = '00:00';
@@ -588,23 +586,24 @@
                     if (!isOvertime) {
                         progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
                         progressBar.classList.remove('overtime');
-                        progressBar.style.left = '0%';
+                        progressBar.style.justifyContent = 'flex-start';
                         progressBar.style.width = `${progress}%`;
                     } else {
-                        const overtimeProgress = (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000) * 100;
+                        const overtimeProgress = Math.min(1, (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000)) * 100;
                         progressBar.classList.add('overtime');
+                        progressBar.style.justifyContent = 'flex-end';
                         progressBar.style.width = `${overtimeProgress}%`;
                     }
                 } else if (!isFocusing && remainingBreakTime > 0) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
                     const progress = Math.min(1, elapsedBreakMilliseconds / totalBreakTime) * 100;
                     progressBar.classList.remove('overtime');
-                    progressBar.style.left = '0%';
+                    progressBar.style.justifyContent = 'flex-start';
                     progressBar.style.width = `${progress}%`;
                 } else {
                     progressBar.style.width = '0%';
                     progressBar.classList.remove('overtime');
-                    progressBar.style.left = '0%';
+                    progressBar.style.justifyContent = 'flex-start';
                 }
             }
 
@@ -627,14 +626,14 @@
                 isFocusing = false;
                 isPaused = false;
 
-                let breakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000; // 默认休息时间
+                let breakDuration = baseBreakDuration; // 使用设定的基础休息时间
 
                 if (earlyBreak && remainingTime > 0) {
-                    breakDuration = Math.max(0, breakDuration - remainingTime * 1000);
+                    breakDuration = Math.max(0, baseBreakDuration - (totalFocusTime - remainingTime) * 1000);
                 } else if (isOvertime) {
                     const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
                     const overtimeRatio = overtimeMilliseconds / (totalFocusTime * 1000);
-                    breakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000 * (1 + overtimeRatio);
+                    breakDuration = baseBreakDuration * (1 + overtimeRatio);
                 }
 
                 totalBreakTime = breakDuration;
@@ -645,6 +644,7 @@
                 controlsContainer.classList.add('hidden');
                 breakButton.textContent = '跳过休息';
                 updateTimerDisplay();
+                updateProgressBar();
                 breakInterval = setInterval(updateTimerDisplay, 100);
             }
 
@@ -660,13 +660,17 @@
             });
 
             // ----- 睡眠时间设置 -----
+            function displaySleepTime() {
+                const [hours, minutes] = latestSleepTime.split(':');
+                sleepHoursInput.value = parseInt(hours);
+                sleepMinutesInput.value = parseInt(minutes);
+                sleepTimeInput.value = latestSleepTime;
+            }
+
             dayProgressContainer.addEventListener('click', () => {
                 sleepTimeSettings.classList.toggle('hidden');
                 if (!sleepTimeSettings.classList.contains('hidden')) {
-                    const [hours, minutes] = latestSleepTime.split(':');
-                    sleepHoursInput.value = parseInt(hours);
-                    sleepMinutesInput.value = parseInt(minutes);
-                    sleepTimeInput.value = latestSleepTime;
+                    displaySleepTime();
                 }
             });
 
@@ -699,6 +703,7 @@
                 updateDayProgress();
                 renderSchedule();
                 sleepTimeTooltip.textContent = latestSleepTime;
+                displaySleepTime(); // 更新输入框显示
             }
 
             function stopDragSleepTime() {
@@ -769,6 +774,7 @@
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
             updateDayProgress();
+            displaySleepTime(); // 初始化显示睡眠时间
             focusDurationDisplay.textContent = focusDurationInput.value;
             breakDurationDisplay.textContent = breakDurationInput.value;
         });
