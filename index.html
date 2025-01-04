@@ -219,7 +219,7 @@
             background-color: #888;
             height: 100%;
             width: 0%;
-            transition: width 0.1s linear;
+            transition: width 0.5s linear; /* 更流畅的过渡 */
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -233,9 +233,7 @@
 
         #progress-bar.overtime {
             background-color: #555;
-            transform-origin: left center;
-            transform: scaleX(0.95);
-            transition: transform 0.3s ease-in-out, background-color 0.3s ease-in-out;
+            transition: background-color 0.3s ease-in-out;
         }
 
         #start-stop-button {
@@ -388,7 +386,8 @@
             let schedule = [];
             let latestSleepTime = localStorage.getItem('sleepTime') || '23:00';
             let isDraggingSleepTime = false;
-            let dragOffsetX;
+            let dragStartMouseY;
+            let dragStartSleepMinutes;
 
             // 专注定时器相关变量
             let focusInterval;
@@ -398,6 +397,7 @@
             let totalFocusTime;
             let focusStartTime;
             let pauseStartTime;
+            let progressBarUpdateInterval;
 
             function updateCurrentTime() {
                 now = new Date();
@@ -487,7 +487,9 @@
                 startStopButton.classList.add('running');
                 controlsContainer.classList.remove('hidden');
                 updateTimerDisplay();
-                updateProgressBar();
+                updateProgressBar(0); // 立即更新一次
+                clearInterval(progressBarUpdateInterval);
+                progressBarUpdateInterval = setInterval(() => updateProgressBar(Math.floor((Date.now() - focusStartTime) / 1000)), 5000);
                 startInterval();
                 focusSettingsSummary.style.display = 'flex';
                 focusSettingsDetailed.style.display = 'none';
@@ -495,6 +497,7 @@
 
             function stopTimer() {
                 clearInterval(focusInterval);
+                clearInterval(progressBarUpdateInterval);
                 isFocusing = false;
                 isPaused = false;
                 startStopButton.textContent = '开始';
@@ -505,6 +508,7 @@
             function pauseTimer() {
                 if (isFocusing && !isPaused) {
                     clearInterval(focusInterval);
+                    clearInterval(progressBarUpdateInterval);
                     isPaused = true;
                     startStopButton.textContent = '继续';
                     pauseStartTime = new Date().getTime();
@@ -512,6 +516,7 @@
                     isPaused = false;
                     startStopButton.textContent = '停止';
                     focusStartTime = focusStartTime + (new Date().getTime() - pauseStartTime);
+                    progressBarUpdateInterval = setInterval(() => updateProgressBar(Math.floor((Date.now() - focusStartTime) / 1000)), 5000);
                     startInterval();
                 }
             }
@@ -520,41 +525,33 @@
                 stopTimer();
                 remainingTime = parseInt(focusDurationInput.value, 10) * 60;
                 updateTimerDisplay();
-                updateProgressBar();
+                updateProgressBar(0);
             }
 
             function startInterval() {
-                const tick = () => {
-                    if (!isPaused) {
-                        const elapsed = Math.floor((new Date().getTime() - focusStartTime) / 1000);
-                        remainingTime = totalFocusTime - elapsed;
-                        updateTimerDisplay();
-                        updateProgressBar(elapsed);
-
-                        if (remainingTime < 0) {
-                            progressBar.classList.add('overtime');
-                        } else {
-                            progressBar.classList.remove('overtime');
-                        }
-                    }
-                };
-                tick();
-                focusInterval = setInterval(tick, 1000);
+                clearInterval(focusInterval); // 防止多次调用
+                focusInterval = setInterval(updateTimerDisplay, 1000);
             }
 
             function updateTimerDisplay() {
-                const elapsedSeconds = Math.floor((totalFocusTime - remainingTime));
-                const minutes = String(Math.floor(elapsedSeconds / 60)).padStart(2, '0');
-                const seconds = String(elapsedSeconds % 60).padStart(2, '0');
-                timerDisplay.textContent = `${minutes}:${seconds}`;
+                if (!isPaused && isFocusing) {
+                    const elapsedSeconds = Math.floor((Date.now() - focusStartTime) / 1000);
+                    remainingTime = totalFocusTime - elapsedSeconds;
+                    const displaySeconds = Math.max(0, remainingTime);
+                    const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
+                    const seconds = String(displaySeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                }
             }
 
             function updateProgressBar(elapsedTime) {
-                const progress = Math.min(1, elapsedTime / totalFocusTime) * 100;
+                const progress = (elapsedTime / totalFocusTime) * 100;
                 progressBar.style.width = `${progress}%`;
-                const displayedMinutes = String(Math.floor(totalFocusTime / 60)).padStart(2, '0');
-                const displayedSeconds = String(totalFocusTime % 60).padStart(2, '0');
-                progressBar.textContent = `${displayedMinutes}:${displayedSeconds}`;
+                if (progress > 100) {
+                    progressBar.classList.add('overtime');
+                } else {
+                    progressBar.classList.remove('overtime');
+                }
             }
 
             startStopButton.addEventListener('click', () => {
@@ -586,48 +583,45 @@
 
             sleepTimeIndicator.addEventListener('mousedown', (e) => {
                 isDraggingSleepTime = true;
-                dragOffsetX = e.clientX - sleepTimeIndicator.offsetLeft;
+                dragStartMouseY = e.clientY;
+                const rect = dayProgressContainer.getBoundingClientRect();
+                const currentLeft = parseFloat(window.getComputedStyle(sleepTimeIndicator).left);
+                const percentage = currentLeft / rect.width;
+                dragStartSleepMinutes = Math.round(percentage * 24 * 60);
                 sleepTimeTooltip.classList.remove('hidden');
                 document.addEventListener('mousemove', dragSleepTime);
                 document.addEventListener('mouseup', stopDragSleepTime);
+                e.preventDefault(); // Prevent text selection
             });
 
             function dragSleepTime(e) {
                 if (!isDraggingSleepTime) return;
                 const rect = dayProgressContainer.getBoundingClientRect();
-                let newPosition = e.clientX - rect.left - dragOffsetX;
-                if (newPosition < 0) newPosition = 0;
-                if (newPosition > rect.width) newPosition = rect.width;
-                sleepTimeIndicator.style.left = `${newPosition}px`;
-                updateSleepTimeTooltip(newPosition, rect.width);
+                const deltaY = e.clientY - dragStartMouseY;
+                const sensitivity = 0.5; // 调整灵敏度
+                let newSleepMinutes = dragStartSleepMinutes - Math.round(deltaY * sensitivity);
+
+                if (newSleepMinutes < 0) newSleepMinutes = 0;
+                if (newSleepMinutes > 24 * 60) newSleepMinutes = 24 * 60;
+
+                latestSleepTime = minutesToTime(newSleepMinutes);
+                localStorage.setItem('sleepTime', latestSleepTime);
+                updateDayProgress();
+                renderSchedule();
+                updateSleepTimeTooltipFromMinutes(newSleepMinutes);
+
             }
 
-            function stopDragSleepTime() {
+            function stopDragSleepTime(e) {
                 if (!isDraggingSleepTime) return;
                 isDraggingSleepTime = false;
                 sleepTimeTooltip.classList.add('hidden');
                 document.removeEventListener('mousemove', dragSleepTime);
                 document.removeEventListener('mouseup', stopDragSleepTime);
-                updateLatestSleepTimeFromPosition();
-                renderSchedule();
             }
 
-            function updateSleepTimeTooltip(position, containerWidth) {
-                const percentage = position / containerWidth;
-                const minutesInDay = 24 * 60;
-                const sleepMinutes = Math.round(percentage * minutesInDay);
-                const newSleepTime = minutesToTime(sleepMinutes);
-                sleepTimeTooltip.textContent = newSleepTime;
-            }
-
-            function updateLatestSleepTimeFromPosition() {
-                const rect = dayProgressContainer.getBoundingClientRect();
-                const position = sleepTimeIndicator.offsetLeft;
-                const percentage = position / rect.width;
-                const minutesInDay = 24 * 60;
-                const sleepMinutes = Math.round(percentage * minutesInDay);
-                latestSleepTime = minutesToTime(sleepMinutes);
-                localStorage.setItem('sleepTime', latestSleepTime);
+            function updateSleepTimeTooltipFromMinutes(minutes) {
+                sleepTimeTooltip.textContent = minutesToTime(minutes);
             }
 
             sleepHoursInput.addEventListener('change', () => {
