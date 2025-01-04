@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间管理助手</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 0;
+            background-color: #f4f4f4;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            padding: 20px;
+            width: 95%;
+            max-width: 600px;
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        #top-time-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+
+        #current-time {
+            font-size: 1.5em;
+            font-weight: bold;
+            display: flex;
+            align-items: baseline;
+        }
+
+        #sleep-time-display {
+            opacity: 0.5;
+            font-size: 0.9em;
+            color: #777;
+            margin-left: 5px;
+            white-space: nowrap;
+        }
+
+        #day-progress-container {
+            height: 5px;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        #day-progress {
+            height: 100%;
+            background-color: #888;
+            width: 0%;
+            transition: width 0.3s ease-in-out;
+        }
+
+        #sleep-time-indicator {
+            position: absolute;
+            top: -5px;
+            height: 15px;
+            width: 1px;
+            background-color: #555;
+            left: 0;
+            transition: left 0.3s ease-in-out;
+        }
+
+        #focus-timer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #focus-settings-summary {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        #focus-settings-summary.locked {
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
+        }
+
+        .setting-label {
+            font-weight: bold;
+        }
+
+        #focus-settings-detailed {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .duration-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .duration-control label {
+            font-size: 0.9em;
+        }
+
+        .duration-control input[type="range"],
+        .duration-control input[type="number"] {
+            flex: 1;
+            margin-left: 5px;
+        }
+
+        #timer-display {
+            text-align: center;
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        #progress-bar-container {
+            position: relative;
+            height: 10px;
+            width: 100%;
+            border-left: 2px solid #888;
+            border-right: 2px solid #888;
+        }
+
+        #progress-bar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background-color: #666;
+            width: 0%;
+            transition: width 0.3s ease-out;
+        }
+
+        .controls-container {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .text-button {
+            background: none;
+            border: 1px solid #888;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            color: #333;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .text-button:hover {
+            background-color: #888;
+            color: white;
+        }
+
+        .text-button.running {
+            background-color: #555;
+            color: white;
+            border-color: #555;
+        }
+
+        .text-button.running:hover {
+            background-color: #333;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* 手机视图 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            #top-time-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 5px;
+            }
+
+            #current-time {
+                font-size: 1.8em;
+            }
+
+            #focus-settings-summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="top-time-bar">
+            <div id="current-time">
+                <span></span><div id="sleep-time-display"></div>
+            </div>
+        </div>
+        <div id="day-progress-container">
+            <div id="day-progress"></div>
+            <div id="sleep-time-indicator"></div>
+        </div>
+
+        <div id="focus-timer">
+            <div id="focus-settings-summary">
+                <div class="setting-label">专注: <span id="focus-duration-display">25</span> 分钟</div>
+                <div class="setting-label">休息: <span id="break-duration-display">5</span> 分钟</div>
+            </div>
+            <div id="focus-settings-detailed">
+                <div class="duration-control">
+                    <label for="focus-duration-slider">专注时长:</label>
+                    <input type="range" id="focus-duration-slider" min="1" max="120" value="25">
+                    <input type="number" id="focus-duration" min="1" max="120" value="25">
+                </div>
+                <div class="duration-control">
+                    <label for="break-duration-slider">休息时长:</label>
+                    <input type="range" id="break-duration-slider" min="1" max="60" value="5">
+                    <input type="number" id="break-duration" min="1" max="60" value="5">
+                </div>
+            </div>
+            <div id="timer-display">00:00</div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <div class="controls-container">
+                <button id="start-stop-button" class="text-button">开始</button>
+                <button id="pause-button" class="text-button hidden">暂停</button>
+                <button id="reset-button" class="text-button hidden">重置</button>
+                <button id="break-button" class="text-button hidden">休息</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentTimeElement = document.querySelector('#current-time > span');
+            const sleepTimeDisplay = document.getElementById('sleep-time-display');
+            const dayProgressContainer = document.getElementById('day-progress-container');
+            const dayProgress = document.getElementById('day-progress');
+            const sleepTimeIndicator = document.getElementById('sleep-time-indicator');
+            const timerDisplay = document.getElementById('timer-display');
+            const progressBar = document.getElementById('progress-bar');
+            const startStopButton = document.getElementById('start-stop-button');
+            const pauseButton = document.getElementById('pause-button');
+            const resetButton = document.getElementById('reset-button');
+            const breakButton = document.getElementById('break-button');
+            const controlsContainer = document.querySelector('.controls-container');
+            const focusSettingsSummary = document.getElementById('focus-settings-summary');
+            const focusSettingsDetailed = document.getElementById('focus-settings-detailed');
+            const focusDurationDisplay = document.getElementById('focus-duration-display');
+            const breakDurationDisplay = document.getElementById('break-duration-display');
+            const focusDurationInput = document.getElementById('focus-duration');
+            const breakDurationInput = document.getElementById('break-duration');
+            const focusDurationSlider = document.getElementById('focus-duration-slider');
+            const breakDurationSlider = document.getElementById('break-duration-slider');
+
+            let now;
+            let latestSleepTime = localStorage.getItem('sleepTime') || '23:00';
+            let isFocusing = false;
+            let isPaused = false;
+            let focusInterval;
+            let remainingTime;
+            let totalFocusTime;
+            let focusStartTime;
+            let pauseStartTime;
+            let breakInterval;
+            let remainingBreakTime;
+            let breakStartTime;
+            let totalBreakTime;
+            let baseBreakDuration;
+            let settingsLocked = false;
+
+            function updateCurrentTime() {
+                now = new Date();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                currentTimeElement.textContent = `${hours}:${minutes}`;
+                sleepTimeDisplay.textContent = latestSleepTime;
+                updateDayProgress();
+            }
+
+            function updateDayProgress() {
+                const minutesInDay = 24 * 60;
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                const progress = (currentMinutes / minutesInDay) * 100;
+                dayProgress.style.width = `${progress}%`;
+
+                const sleepTimeMinutes = timeToMinutes(latestSleepTime);
+                const sleepPosition = (sleepTimeMinutes / minutesInDay) * 100;
+                sleepTimeIndicator.style.left = `${sleepPosition}%`;
+            }
+
+            function timeToMinutes(timeString) {
+                const [hours, minutes] = timeString.split(':').map(Number);
+                return hours * 60 + minutes;
+            }
+
+            function minutesToTime(totalMinutes) {
+                const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
+                const minutes = String(totalMinutes % 60).padStart(2, '0');
+                return `${hours}:${minutes}`;
+            }
+
+            function startFocusTimer() {
+                isFocusing = true;
+                isPaused = false;
+                baseBreakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000;
+                const focusTime = parseInt(focusDurationInput.value, 10) * 60;
+                totalFocusTime = focusTime;
+                remainingTime = focusTime;
+                focusStartTime = Date.now();
+                startStopButton.textContent = '停止';
+                startStopButton.classList.add('running');
+                pauseButton.classList.remove('hidden');
+                resetButton.classList.remove('hidden');
+                breakButton.classList.remove('hidden');
+                updateTimerDisplay();
+                focusInterval = setInterval(updateTimerDisplay, 100);
+                updateProgressBar();
+                focusSettingsSummary.classList.add('locked');
+                settingsLocked = true;
+            }
+
+            function stopTimer() {
+                clearInterval(focusInterval);
+                clearInterval(breakInterval);
+                isFocusing = false;
+                isPaused = false;
+                startStopButton.textContent = '开始';
+                startStopButton.classList.remove('running');
+                pauseButton.classList.add('hidden');
+                resetButton.classList.add('hidden');
+                breakButton.classList.add('hidden');
+                updateProgressBar();
+                focusSettingsSummary.classList.remove('locked');
+                settingsLocked = false;
+            }
+
+            function pauseTimer() {
+                if (isFocusing && !isPaused) {
+                    clearInterval(focusInterval);
+                    clearInterval(breakInterval);
+                    isPaused = true;
+                    startStopButton.textContent = '继续';
+                    pauseStartTime = Date.now();
+                } else if (isFocusing && isPaused) {
+                    isPaused = false;
+                    startStopButton.textContent = '停止';
+                    focusStartTime = focusStartTime + (Date.now() - pauseStartTime);
+                    focusInterval = setInterval(updateTimerDisplay, 100);
+                } else if (!isFocusing && remainingBreakTime > 0 && isPaused) {
+                    isPaused = false;
+                    breakStartTime = breakStartTime + (Date.now() - pauseStartTime);
+                    breakInterval = setInterval(updateTimerDisplay, 100);
+                }
+            }
+
+            function resetTimer() {
+                stopTimer();
+                remainingTime = parseInt(focusDurationInput.value, 10) * 60;
+                updateTimerDisplay();
+                updateProgressBar();
+            }
+
+            function updateTimerDisplay() {
+                if (isFocusing && !isPaused) {
+                    const elapsedMilliseconds = Date.now() - focusStartTime;
+                    remainingTime = totalFocusTime - Math.floor(elapsedMilliseconds / 1000);
+                    const displaySeconds = Math.max(0, remainingTime);
+                    const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
+                    const seconds = String(displaySeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                    updateProgressBar();
+                } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
+                    const elapsedBreakMilliseconds = Date.now() - breakStartTime;
+                    const displayedBreakSeconds = Math.ceil(remainingBreakTime / 1000 - elapsedBreakMilliseconds / 1000);
+                    if (displayedBreakSeconds <= 0) {
+                        clearInterval(breakInterval);
+                        timerDisplay.textContent = '00:00';
+                        progressBar.style.width = '0%';
+                        return;
+                    }
+                    const minutes = String(Math.floor(displayedBreakSeconds / 60)).padStart(2, '0');
+                    const seconds = String(displayedBreakSeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                    updateProgressBar();
+                }
+            }
+
+            function updateProgressBar() {
+                if (isFocusing) {
+                    const progress = Math.max(0, Math.min(1, (Date.now() - focusStartTime) / (totalFocusTime * 1000))) * 100;
+                    progressBar.style.width = `${progress}%`;
+                } else if (!isFocusing && remainingBreakTime > 0) {
+                    const progress = Math.max(0, Math.min(1, (Date.now() - breakStartTime) / totalBreakTime)) * 100;
+                    progressBar.style.width = `${progress}%`;
+                } else {
+                    progressBar.style.width = '0%';
+                }
+            }
+
+            startStopButton.addEventListener('click', () => {
+                if (isFocusing) {
+                    stopTimer();
+                } else {
+                    startFocusTimer();
+                }
+            });
+
+            pauseButton.addEventListener('click', () => {
+                pauseTimer();
+            });
+
+            resetButton.addEventListener('click', resetTimer);
+
+            function startBreakTimer() {
+                clearInterval(focusInterval);
+                isFocusing = false;
+                isPaused = false;
+                focusSettingsSummary.classList.remove('locked');
+                settingsLocked = false;
+
+                const breakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000;
+                totalBreakTime = breakDuration;
+                remainingBreakTime = breakDuration;
+                breakStartTime = Date.now();
+                startStopButton.textContent = '开始';
+                startStopButton.classList.remove('running');
+                pauseButton.classList.add('hidden');
+                resetButton.classList.add('hidden');
+                breakButton.textContent = '跳过';
+                updateTimerDisplay();
+                updateProgressBar();
+                breakInterval = setInterval(updateTimerDisplay, 100);
+            }
+
+            breakButton.addEventListener('click', () => {
+                if (isFocusing) {
+                    startBreakTimer();
+                } else if (remainingBreakTime > 0) {
+                    clearInterval(breakInterval);
+                    remainingBreakTime = 0;
+                    timerDisplay.textContent = '00:00';
+                    progressBar.style.width = '0%';
+                    breakButton.classList.add('hidden');
+                }
+            });
+
+            focusSettingsSummary.addEventListener('click', () => {
+                if (!settingsLocked) {
+                    focusSettingsDetailed.style.display = focusSettingsDetailed.style.display === 'none' ? 'flex' : 'none';
+                }
+            });
+
+            focusDurationSlider.addEventListener('input', () => {
+                focusDurationInput.value = focusDurationSlider.value;
+                focusDurationDisplay.textContent = focusDurationSlider.value;
+            });
+
+            focusDurationInput.addEventListener('change', () => {
+                focusDurationSlider.value = focusDurationInput.value;
+                focusDurationDisplay.textContent = focusDurationInput.value;
+            });
+
+            breakDurationSlider.addEventListener('input', () => {
+                breakDurationInput.value = breakDurationSlider.value;
+                breakDurationDisplay.textContent = breakDurationSlider.value;
+            });
+
+            breakDurationInput.addEventListener('change', () => {
+                breakDurationSlider.value = breakDurationInput.value;
+                breakDurationDisplay.textContent = breakDurationInput.value;
+            });
+
+            setInterval(updateCurrentTime, 1000);
+            updateCurrentTime();
+            focusDurationDisplay.textContent = focusDurationInput.value;
+            breakDurationDisplay.textContent = breakDurationInput.value;
+        });
+    </script>
+</body>
+</html>
