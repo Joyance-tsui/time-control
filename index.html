@@ -46,6 +46,7 @@
             font-size: 1.8em;
             font-weight: bold;
             color: #555;
+            transition: color 0.3s ease;
         }
 
         #schedule-container {
@@ -59,6 +60,7 @@
             align-items: center;
             overflow-x: auto;
             padding: 0 10px;
+            transition: opacity 0.3s ease;
         }
 
         .schedule-item {
@@ -77,7 +79,7 @@
             flex-shrink: 0;
             position: absolute;
             top: 0;
-            transition: left 0.1s ease-out, width 0.1s ease-out, background-color 0.3s ease;
+            transition: left 0.2s ease-out, width 0.2s ease-out, background-color 0.3s ease;
         }
 
         .schedule-item.late {
@@ -87,6 +89,7 @@
 
         .schedule-item.active {
             background-color: #bbb;
+            color: #fff;
         }
 
         #focus-timer {
@@ -94,6 +97,15 @@
             padding: 25px;
             border-radius: 5px;
             margin-top: 20px;
+            opacity: 0;
+            height: 0;
+            overflow: hidden;
+            transition: opacity 0.5s ease, height 0.5s ease;
+        }
+
+        #focus-timer.show {
+            opacity: 1;
+            height: auto;
         }
 
         #focus-timer h2 {
@@ -103,33 +115,13 @@
             color: #555;
         }
 
-        .input-group {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-        }
-
-        .input-group label {
-            margin-right: 15px;
-            font-weight: bold;
-            color: #555;
-        }
-
-        .input-group input[type="number"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            width: 60px;
-            text-align: center;
-            color: #555;
-        }
-
         #timer-display {
             text-align: center;
             font-size: 3em;
             font-weight: bold;
             margin-bottom: 20px;
             color: #555;
+            transition: color 0.3s ease;
         }
 
         #progress-bar-container {
@@ -140,13 +132,14 @@
             overflow: hidden;
             cursor: pointer;
             position: relative;
+            transition: background-color 0.3s ease;
         }
 
         #progress-bar {
             background-color: #888;
             height: 100%;
             width: 0%;
-            transition: width 0.1s linear;
+            transition: width 0.15s linear, background-color 0.3s ease;
             border-radius: 10px;
         }
 
@@ -157,6 +150,7 @@
             background-color: #ccc;
             opacity: 0.6;
             pointer-events: none;
+            transition: width 0.3s ease;
         }
 
         .controls {
@@ -202,19 +196,16 @@
 
         <div id="focus-timer">
             <h2>专注时间</h2>
-            <div class="input-group">
-                <label for="focus-duration">专注时长 (分钟):</label>
-                <input type="number" id="focus-duration" value="25">
-            </div>
             <div id="timer-display">00:00</div>
-            <div id="progress-bar-container">
-                <div id="progress-bar"></div>
-                <div id="progress-bar-sleep"></div>
-            </div>
             <div class="controls">
                 <button id="start-focus-button" class="control-button">开始专注</button>
                 <button id="start-rest-button" class="control-button hidden">开始休息</button>
             </div>
+        </div>
+
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+            <div id="progress-bar-sleep"></div>
         </div>
     </div>
 
@@ -223,7 +214,6 @@
             const currentTimeElement = document.getElementById('current-time');
             const scheduleContainer = document.getElementById('schedule-container');
             const focusTimerSection = document.getElementById('focus-timer');
-            const focusDurationInput = document.getElementById('focus-duration');
             const timerDisplay = document.getElementById('timer-display');
             const progressBar = document.getElementById('progress-bar');
             const progressBarContainer = document.getElementById('progress-bar-container');
@@ -238,10 +228,9 @@
             let draggedItem = null;
             let dragStartOffset;
             let focusInterval;
-            let remainingTime = 0; // Initialize remainingTime
+            let elapsedFocusTime = 0;
             let isFocusing = false;
             let focusStartTime;
-            let totalFocusTimeSet;
 
             // Load sleep time from local storage
             let sleepTime = localStorage.getItem('sleepTime') || '23:00';
@@ -250,29 +239,25 @@
             // Default schedule settings
             const defaultSchedule = [
                 { start: '08:00', end: '09:00', label: '起床/早餐' },
-                { start: '09:00', end: '12:00', label: '专注工作' },
+                { start: '09:00', end: '12:00', label: '工作' },
                 { start: '12:00', end: '13:00', label: '午餐' },
-                { start: '13:00', end: '17:00', label: '项目开发' },
-                { start: '17:00', end: '18:00', label: '健身' },
+                { start: '13:00', end: '17:00', label: '工作' },
+                { start: '17:00', end: '18:00', label: '运动' },
                 { start: '18:00', end: '19:00', label: '晚餐' },
-                { start: '19:00', end: '22:30', label: '学习/休闲' },
+                { start: '19:00', end: '22:30', label: '休闲' },
             ];
-
             schedule = defaultSchedule;
 
             function updateCurrentTime() {
                 now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                if (currentTimeElement) {
-                    currentTimeElement.textContent = `${hours}:${minutes}`;
-                }
+                currentTimeElement.textContent = `${hours}:${minutes}`;
                 updateDayProgress();
                 highlightCurrentSchedule();
             }
 
             function renderSchedule() {
-                if (!scheduleContainer) return;
                 scheduleContainer.innerHTML = '';
                 const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                 const minutesInDay = 24 * 60;
@@ -290,14 +275,13 @@
                     scheduleItem.textContent = item.label;
                     scheduleItem.style.left = `${startPosition}px`;
                     scheduleItem.style.width = `${width}px`;
-                    scheduleItem.style.transition = 'left 0.1s ease-out, width 0.1s ease-out, background-color 0.3s ease';
+                    scheduleItem.draggable = true;
 
                     if (item.end > latestSleepTime) {
                         scheduleItem.classList.add('late');
                     }
 
                     scheduleItem.addEventListener('mousedown', startDrag);
-
                     scheduleContainer.appendChild(scheduleItem);
                 });
             }
@@ -329,108 +313,78 @@
 
             function startFocus() {
                 isFocusing = true;
-                if (focusTimerSection) {
-                    focusTimerSection.classList.remove('hidden');
-                }
-                totalFocusTimeSet = parseInt(focusDurationInput.value, 10) * 60;
-                remainingTime = 0;
-                focusStartTime = new Date().getTime();
-                if (startFocusButton) {
-                    startFocusButton.textContent = '专注中...';
-                    startFocusButton.classList.add('running');
-                }
-                if (startRestButton) {
-                    startRestButton.classList.remove('hidden');
-                }
+                focusTimerSection.classList.add('show');
+                elapsedFocusTime = 0;
+                focusStartTime = Date.now();
+                startFocusButton.textContent = '专注中...';
+                startFocusButton.classList.add('running');
+                startRestButton.classList.remove('hidden');
                 updateTimerDisplay();
                 focusInterval = setInterval(updateFocusTimer, 1000);
             }
 
             function updateFocusTimer() {
-                const nowTime = new Date().getTime();
-                remainingTime = Math.floor((nowTime - focusStartTime) / 1000);
+                const nowTime = Date.now();
+                elapsedFocusTime = Math.floor((nowTime - focusStartTime) / 1000);
                 updateTimerDisplay();
             }
 
             function startRest() {
                 clearInterval(focusInterval);
                 isFocusing = false;
-                if (startFocusButton) {
-                    startFocusButton.textContent = '开始专注';
-                    startFocusButton.classList.remove('running');
-                }
-                if (startRestButton) {
-                    startRestButton.classList.add('hidden');
-                }
+                startFocusButton.textContent = '开始专注';
+                startFocusButton.classList.remove('running');
+                startRestButton.classList.add('hidden');
 
-                const actualFocusTime = remainingTime;
-                const restDuration = Math.min(30 * 60, Math.max(5 * 60, Math.floor(actualFocusTime / 5)));
-                if (timerDisplay) {
-                    timerDisplay.textContent = `${String(Math.floor(restDuration / 60)).padStart(2, '0')}:${String(restDuration % 60).padStart(2, '0')}`;
-                }
-                if (progressBar) {
-                    progressBar.style.width = '100%';
-                }
-
-                alert('专注结束，休息一下！');
+                const restDurationSeconds = Math.min(1800, Math.max(300, Math.floor(elapsedFocusTime / 5)));
+                const restMinutes = String(Math.floor(restDurationSeconds / 60)).padStart(2, '0');
+                const restSeconds = String(restDurationSeconds % 60).padStart(2, '0');
+                timerDisplay.textContent = `${restMinutes}:${restSeconds}`;
+                progressBar.style.width = '100%';
+                alert('专注结束，建议休息片刻！');
+                focusTimerSection.classList.remove('show');
             }
 
             function updateTimerDisplay() {
-                const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
-                const seconds = String(remainingTime % 60).padStart(2, '0');
-                if (timerDisplay) {
-                    timerDisplay.textContent = `${minutes}:${seconds}`;
-                }
-                const progress = totalFocusTimeSet > 0 ? Math.min(1, remainingTime / totalFocusTimeSet) * 100 : 0;
-                if (progressBar) {
-                    progressBar.style.width = `${progress}%`;
-                }
+                const minutes = String(Math.floor(elapsedFocusTime / 60)).padStart(2, '0');
+                const seconds = String(elapsedFocusTime % 60).padStart(2, '0');
+                timerDisplay.textContent = `${minutes}:${seconds}`;
             }
 
-            if (startFocusButton) {
-                startFocusButton.addEventListener('click', () => {
-                    if (!isFocusing) {
-                        startFocus();
-                    }
-                });
-            }
+            startFocusButton.addEventListener('click', () => {
+                if (!isFocusing) {
+                    startFocus();
+                }
+            });
 
-            if (startRestButton) {
-                startRestButton.addEventListener('click', startRest);
-            }
+            startRestButton.addEventListener('click', startRest);
 
             function updateDayProgress() {
                 const nowMinutes = now.getHours() * 60 + now.getMinutes();
                 const minutesInDay = 24 * 60;
                 const progress = (nowMinutes / minutesInDay) * 100;
-                if (progressBarContainer && progressBarContainer.querySelector('#progress-bar')) {
-                    progressBarContainer.querySelector('#progress-bar').style.width = `${progress}%`;
-                }
+                progressBar.style.width = `${progress}%`;
 
                 const sleepTimeMinutes = timeToMinutes(sleepTime);
                 const sleepProgress = (sleepTimeMinutes / minutesInDay) * 100;
-                if (progressBarSleep) {
-                    progressBarSleep.style.width = `${sleepProgress}%`;
-                }
+                progressBarSleep.style.width = `${sleepProgress}%`;
             }
 
-            if (progressBarContainer) {
-                progressBarContainer.addEventListener('click', (e) => {
-                    const rect = progressBarContainer.getBoundingClientRect();
-                    const clickPosition = e.clientX - rect.left;
-                    const containerWidth = rect.width;
-                    const clickedPercentage = clickPosition / containerWidth;
-                    const minutesInDay = 24 * 60;
-                    const clickedMinutes = Math.round(clickedPercentage * minutesInDay);
-                    const newSleepTime = minutesToTime(clickedMinutes);
+            progressBarContainer.addEventListener('click', (e) => {
+                const rect = progressBarContainer.getBoundingClientRect();
+                const clickPosition = e.clientX - rect.left;
+                const containerWidth = rect.width;
+                const clickedPercentage = clickPosition / containerWidth;
+                const minutesInDay = 24 * 60;
+                const clickedMinutes = Math.round(clickedPercentage * minutesInDay);
+                const newSleepTime = minutesToTime(clickedMinutes);
 
-                    sleepTime = newSleepTime;
-                    latestSleepTime = newSleepTime;
-                    localStorage.setItem('sleepTime', newSleepTime);
-                    updateDayProgress();
-                    renderSchedule();
-                });
-            }
+                sleepTime = newSleepTime;
+                latestSleepTime = newSleepTime;
+                localStorage.setItem('sleepTime', newSleepTime);
+                updateDayProgress();
+                renderSchedule();
+            });
 
             function startDrag(e) {
                 isDragging = true;
@@ -484,7 +438,6 @@
             // Initialization
             renderSchedule();
             updateCurrentTime();
-            updateDayProgress();
             setInterval(updateCurrentTime, 60000);
         });
     </script>
