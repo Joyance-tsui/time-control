@@ -219,7 +219,7 @@
             background-color: #888;
             height: 100%;
             width: 0%;
-            transition: width 0.5s linear; /* 更流畅的过渡 */
+            transition: width 0.1s linear; /* 更流畅的过渡 */
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -233,7 +233,6 @@
 
         #progress-bar.overtime {
             background-color: #555;
-            transition: background-color 0.3s ease-in-out;
         }
 
         #start-stop-button {
@@ -397,7 +396,6 @@
             let totalFocusTime;
             let focusStartTime;
             let pauseStartTime;
-            let progressBarUpdateInterval;
 
             function updateCurrentTime() {
                 now = new Date();
@@ -482,22 +480,19 @@
                 const focusTime = parseInt(focusDurationInput.value, 10) * 60;
                 totalFocusTime = focusTime;
                 remainingTime = focusTime;
-                focusStartTime = new Date().getTime();
+                focusStartTime = Date.now();
                 startStopButton.textContent = '停止';
                 startStopButton.classList.add('running');
                 controlsContainer.classList.remove('hidden');
                 updateTimerDisplay();
-                updateProgressBar(0); // 立即更新一次
-                clearInterval(progressBarUpdateInterval);
-                progressBarUpdateInterval = setInterval(() => updateProgressBar(Math.floor((Date.now() - focusStartTime) / 1000)), 5000);
-                startInterval();
+                updateProgressBar();
+                focusInterval = setInterval(updateTimerDisplay, 1000);
                 focusSettingsSummary.style.display = 'flex';
                 focusSettingsDetailed.style.display = 'none';
             }
 
             function stopTimer() {
                 clearInterval(focusInterval);
-                clearInterval(progressBarUpdateInterval);
                 isFocusing = false;
                 isPaused = false;
                 startStopButton.textContent = '开始';
@@ -508,16 +503,14 @@
             function pauseTimer() {
                 if (isFocusing && !isPaused) {
                     clearInterval(focusInterval);
-                    clearInterval(progressBarUpdateInterval);
                     isPaused = true;
                     startStopButton.textContent = '继续';
-                    pauseStartTime = new Date().getTime();
+                    pauseStartTime = Date.now();
                 } else if (isFocusing && isPaused) {
                     isPaused = false;
                     startStopButton.textContent = '停止';
-                    focusStartTime = focusStartTime + (new Date().getTime() - pauseStartTime);
-                    progressBarUpdateInterval = setInterval(() => updateProgressBar(Math.floor((Date.now() - focusStartTime) / 1000)), 5000);
-                    startInterval();
+                    focusStartTime = focusStartTime + (Date.now() - pauseStartTime);
+                    focusInterval = setInterval(updateTimerDisplay, 1000);
                 }
             }
 
@@ -525,31 +518,33 @@
                 stopTimer();
                 remainingTime = parseInt(focusDurationInput.value, 10) * 60;
                 updateTimerDisplay();
-                updateProgressBar(0);
-            }
-
-            function startInterval() {
-                clearInterval(focusInterval); // 防止多次调用
-                focusInterval = setInterval(updateTimerDisplay, 1000);
+                updateProgressBar();
             }
 
             function updateTimerDisplay() {
-                if (!isPaused && isFocusing) {
+                if (isFocusing && !isPaused) {
                     const elapsedSeconds = Math.floor((Date.now() - focusStartTime) / 1000);
                     remainingTime = totalFocusTime - elapsedSeconds;
                     const displaySeconds = Math.max(0, remainingTime);
                     const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
                     const seconds = String(displaySeconds % 60).padStart(2, '0');
                     timerDisplay.textContent = `${minutes}:${seconds}`;
+                    updateProgressBar(); // 同步更新进度条
                 }
             }
 
-            function updateProgressBar(elapsedTime) {
-                const progress = (elapsedTime / totalFocusTime) * 100;
-                progressBar.style.width = `${progress}%`;
-                if (progress > 100) {
-                    progressBar.classList.add('overtime');
+            function updateProgressBar() {
+                if (isFocusing) {
+                    const elapsedSeconds = Math.floor((Date.now() - focusStartTime) / 1000);
+                    const progress = Math.min(1, elapsedSeconds / totalFocusTime) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress > 100) {
+                        progressBar.classList.add('overtime');
+                    } else {
+                        progressBar.classList.remove('overtime');
+                    }
                 } else {
+                    progressBar.style.width = '0%';
                     progressBar.classList.remove('overtime');
                 }
             }
@@ -589,16 +584,17 @@
                 const percentage = currentLeft / rect.width;
                 dragStartSleepMinutes = Math.round(percentage * 24 * 60);
                 sleepTimeTooltip.classList.remove('hidden');
+                sleepTimeTooltip.textContent = latestSleepTime; // 初始化显示
                 document.addEventListener('mousemove', dragSleepTime);
                 document.addEventListener('mouseup', stopDragSleepTime);
-                e.preventDefault(); // Prevent text selection
+                e.preventDefault();
             });
 
             function dragSleepTime(e) {
                 if (!isDraggingSleepTime) return;
                 const rect = dayProgressContainer.getBoundingClientRect();
                 const deltaY = e.clientY - dragStartMouseY;
-                const sensitivity = 0.5; // 调整灵敏度
+                const sensitivity = 0.5;
                 let newSleepMinutes = dragStartSleepMinutes - Math.round(deltaY * sensitivity);
 
                 if (newSleepMinutes < 0) newSleepMinutes = 0;
@@ -608,11 +604,10 @@
                 localStorage.setItem('sleepTime', latestSleepTime);
                 updateDayProgress();
                 renderSchedule();
-                updateSleepTimeTooltipFromMinutes(newSleepMinutes);
-
+                sleepTimeTooltip.textContent = latestSleepTime; // 更新 tooltip
             }
 
-            function stopDragSleepTime(e) {
+            function stopDragSleepTime() {
                 if (!isDraggingSleepTime) return;
                 isDraggingSleepTime = false;
                 sleepTimeTooltip.classList.add('hidden');
@@ -620,41 +615,30 @@
                 document.removeEventListener('mouseup', stopDragSleepTime);
             }
 
-            function updateSleepTimeTooltipFromMinutes(minutes) {
-                sleepTimeTooltip.textContent = minutesToTime(minutes);
-            }
-
             sleepHoursInput.addEventListener('change', () => {
-                latestSleepTime = `${String(parseInt(sleepHoursInput.value)).padStart(2, '0')}:${latestSleepTime.split(':')[1]}`;
-                sleepTimeInput.value = latestSleepTime;
-                localStorage.setItem('sleepTime', latestSleepTime);
-                updateDayProgress();
-                renderSchedule();
-                updateSleepTimeIndicator();
+                updateSleepTimeFromInput();
             });
 
             sleepMinutesInput.addEventListener('change', () => {
-                latestSleepTime = `${latestSleepTime.split(':')[0]}:${String(parseInt(sleepMinutesInput.value)).padStart(2, '0')}`;
-                sleepTimeInput.value = latestSleepTime;
-                localStorage.setItem('sleepTime', latestSleepTime);
-                updateDayProgress();
-                renderSchedule();
-                updateSleepTimeIndicator();
+                updateSleepTimeFromInput();
             });
 
             sleepTimeInput.addEventListener('change', () => {
-                const value = sleepTimeInput.value;
-                if (/^\d{1,2}:\d{1,2}$/.test(value)) {
-                    const [hours, minutes] = value.split(':');
-                    if (parseInt(hours) >= 0 && parseInt(hours) < 24 && parseInt(minutes) >= 0 && parseInt(minutes) < 60) {
-                        latestSleepTime = `${String(parseInt(hours)).padStart(2, '0')}:${String(parseInt(minutes)).padStart(2, '0')}`;
-                        localStorage.setItem('sleepTime', latestSleepTime);
-                        updateDayProgress();
-                        renderSchedule();
-                        updateSleepTimeIndicator();
-                    }
-                }
+                updateSleepTimeFromInput();
             });
+
+            function updateSleepTimeFromInput() {
+                const hours = parseInt(sleepHoursInput.value);
+                const minutes = parseInt(sleepMinutesInput.value);
+                if (hours >= 0 && hours < 24 && minutes >= 0 && minutes < 60) {
+                    latestSleepTime = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+                    sleepTimeInput.value = latestSleepTime;
+                    localStorage.setItem('sleepTime', latestSleepTime);
+                    updateDayProgress();
+                    renderSchedule();
+                    updateSleepTimeIndicator();
+                }
+            }
 
             sleepTimeConfirmButton.addEventListener('click', () => {
                 sleepTimeSettings.classList.add('hidden');
@@ -687,20 +671,12 @@
             });
 
             // 初始渲染
-            const initialSchedule = [
-                { start: '08:00', end: '09:00', label: '起床/早餐' },
-                { start: '09:00', end: '12:00', label: '专注工作' },
-                { start: '12:00', end: '13:00', label: '午餐' },
-                { start: '13:00', end: '17:00', label: '项目开发' },
-                { start: '17:00', end: '18:00', label: '健身' },
-                { start: '18:00', end: '19:00', label: '晚餐' },
-                { start: '19:00', end: '22:30', label: '学习/休闲' },
-            ];
-            schedule = initialSchedule;
             renderSchedule();
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
             updateDayProgress();
+            focusDurationDisplay.textContent = focusDurationInput.value;
+            breakDurationDisplay.textContent = breakDurationInput.value;
         });
     </script>
 </body>
