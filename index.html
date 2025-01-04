@@ -8,46 +8,44 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            background-color: #fff;
+            background-color: #fff; /* 纯白色背景 */
             color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
         }
 
         .container {
-            background-color: #f0f0f0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            padding: 30px;
-            width: 90%;
-            max-width: 800px;
-            margin-top: 20px;
+            background-color: #fff;
+            border-radius: 0; /* 去除圆角 */
+            padding: 20px;
+            width: 95%;
+            max-width: 1000px;
+            margin-top: 10px;
+            box-shadow: none; /* 去除阴影 */
         }
 
         #top-time-bar {
-            background-color: #e0e0e0;
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            background-color: #eee;
+            padding: 10px;
+            border-radius: 0;
+            margin-bottom: 10px;
             position: relative;
             display: flex;
             align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            transition: background-color 0.3s ease;
+            justify-content: space-between; /* 将时间放在左边，睡眠时间图标在右边 */
         }
 
         #current-time {
-            font-size: 1.8em;
+            font-size: 1.5em;
             font-weight: bold;
-            color: #555;
-            transition: color 0.3s ease;
+        }
+
+        #sleep-time-setter {
+            cursor: pointer;
+            font-size: 0.9em;
+            color: #777;
         }
 
         #schedule-container {
@@ -55,138 +53,147 @@
             top: 100%;
             left: 0;
             right: 0;
-            height: 40px;
-            margin-top: 5px;
+            height: 30px;
+            margin-top: 2px;
             display: flex;
             align-items: center;
-            overflow-x: auto;
-            padding: 0 10px;
-            opacity: 0;
-            transition: opacity 0.5s ease;
+            overflow-x: auto; /* 允许水平滚动 */
+            overflow-y: hidden;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
         }
 
-        #schedule-container.show {
-            opacity: 1;
+        #schedule-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
         }
 
         .schedule-item {
             background-color: #ccc;
-            color: #555;
-            padding: 8px 12px;
-            border-radius: 5px;
-            margin-right: 5px;
-            font-size: 0.9em;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 0;
+            margin-right: 2px;
+            font-size: 0.8em;
             cursor: grab;
+            position: absolute;
+            top: 0;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-            flex-shrink: 0;
-            position: absolute;
-            top: 0;
-            transition: left 0.2s ease-out, width 0.2s ease-out, background-color 0.3s ease, color 0.3s ease;
+            box-shadow: 0 0 2px rgba(0, 0, 0, 0.3);
+            user-select: none;
         }
 
         .schedule-item.late {
-            background-color: #aaa;
-            color: #fff;
-        }
-
-        .schedule-item.active {
-            background-color: #bbb;
-            color: #fff;
+            background-color: #888; /* 更深的灰色表示晚于睡眠时间 */
         }
 
         #focus-timer {
-            background-color: #e0e0e0;
-            padding: 25px;
-            border-radius: 5px;
-            margin-top: 20px;
-            opacity: 0;
-            height: 0;
-            overflow: hidden;
-            transition: opacity 0.5s ease, height 0.5s ease, background-color 0.3s ease;
+            background-color: #eee;
+            padding: 20px;
+            border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
-        #focus-timer.show {
-            opacity: 1;
-            height: auto;
+        #focus-timer h2 {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+            display: none; /* 默认不显示标题 */
+        }
+
+        .input-group {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            display: none; /* 默认不显示输入框 */
+        }
+
+        .input-group label {
+            margin-right: 10px;
+            font-weight: bold;
+        }
+
+        .input-group input[type="number"] {
+            padding: 6px;
+            border-radius: 0;
+            border: 1px solid #ccc;
+            width: 50px;
+            text-align: center;
         }
 
         #timer-display {
             text-align: center;
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
-            margin-bottom: 20px;
-            color: #555;
-            transition: color 0.3s ease;
+            margin-bottom: 15px;
         }
 
         #progress-bar-container {
             background-color: #ddd;
-            border-radius: 10px;
-            height: 10px;
-            margin-bottom: 20px;
+            border-radius: 0;
+            height: 20px;
+            margin-bottom: 15px;
             overflow: hidden;
-            cursor: pointer;
-            position: relative;
-            transition: background-color 0.3s ease;
+            width: 100%;
         }
 
         #progress-bar {
-            background-color: #888;
+            background-color: #000; /* 黑色进度条 */
             height: 100%;
             width: 0%;
-            transition: width 0.15s linear, background-color 0.3s ease;
-            border-radius: 10px;
+            transition: width 0.1s linear;
+            border-radius: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 0.7em;
         }
 
         #progress-bar.overtime {
-            background-color: #b35f5f;
+            background-color: #777; /* 深灰色表示超时 */
         }
 
-        #progress-bar-sleep {
-            position: absolute;
-            top: 0;
-            height: 100%;
-            background-color: #bbb;
-            opacity: 0.6;
-            pointer-events: none;
-            transition: width 0.3s ease, background-color 0.3s ease;
-        }
-
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .control-button {
-            padding: 12px 25px;
+        #start-stop-button {
+            padding: 10px 20px;
             border: none;
-            background-color: #888;
+            background-color: #000;
             color: white;
-            border-radius: 5px;
+            border-radius: 0;
             cursor: pointer;
-            font-size: 1.1em;
-            transition: background-color 0.3s ease, color 0.3s ease;
+            font-size: 1em;
+            transition: background-color 0.3s ease;
         }
 
-        .control-button:hover {
-            background-color: #666;
+        #start-stop-button:hover {
+            background-color: #333;
         }
 
-        .control-button.running {
-            background-color: #aaa;
+        #start-stop-button.running {
+            background-color: #777;
         }
 
-        .control-button.running:hover {
-            background-color: #999;
+        #start-stop-button.running:hover {
+            background-color: #555;
         }
 
         .hidden {
             display: none !important;
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        #current-time {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
@@ -194,20 +201,25 @@
     <div class="container">
         <div id="top-time-bar">
             <div id="current-time"></div>
+            <div id="sleep-time-setter" title="点击设置睡眠时间">🌙</div>
             <div id="schedule-container"></div>
         </div>
 
-        <div id="focus-timer">
-            <div id="timer-display">00:00</div>
-            <div class="controls">
-                <button id="start-focus-button" class="control-button">开始专注</button>
-                <button id="start-rest-button" class="control-button hidden">休息</button>
+        <div id="focus-timer" class="hidden">
+            <h2>专注时间</h2>
+            <div class="input-group">
+                <label for="focus-duration">专注时长 (分钟):</label>
+                <input type="number" id="focus-duration" value="25">
             </div>
-        </div>
-
-        <div id="progress-bar-container">
-            <div id="progress-bar"></div>
-            <div id="progress-bar-sleep"></div>
+            <div class="input-group">
+                <label for="break-duration">休息时长 (分钟):</label>
+                <input type="number" id="break-duration" value="5">
+            </div>
+            <div id="timer-display">00:00</div>
+            <div id="progress-bar-container">
+                <div id="progress-bar"></div>
+            </div>
+            <button id="start-stop-button">开始</button>
         </div>
     </div>
 
@@ -216,47 +228,44 @@
             const currentTimeElement = document.getElementById('current-time');
             const scheduleContainer = document.getElementById('schedule-container');
             const focusTimerSection = document.getElementById('focus-timer');
+            const focusDurationInput = document.getElementById('focus-duration');
+            const breakDurationInput = document.getElementById('break-duration');
             const timerDisplay = document.getElementById('timer-display');
             const progressBar = document.getElementById('progress-bar');
-            const progressBarContainer = document.getElementById('progress-bar-container');
-            const progressBarSleep = document.getElementById('progress-bar-sleep');
-            const startFocusButton = document.getElementById('start-focus-button');
-            const startRestButton = document.getElementById('start-rest-button');
+            const startStopButton = document.getElementById('start-stop-button');
+            const sleepTimeSetter = document.getElementById('sleep-time-setter');
 
             let now;
             let schedule = [];
-            let latestSleepTime;
-            let isDragging = false;
-            let draggedItem = null;
-            let dragStartOffset;
+            let latestSleepTime = localStorage.getItem('sleepTime') || '23:00';
+            let isDraggingScheduleItem = false;
+            let draggedScheduleItem = null;
+            let dragScheduleOffsetX;
+            let isFocusActive = false; // 控制专注时间显示
             let focusInterval;
-            let elapsedFocusTime = 0;
+            let remainingTime;
             let isFocusing = false;
-            let focusStartTime;
+            let totalFocusTime;
 
-            // Load sleep time from local storage
-            let sleepTime = localStorage.getItem('sleepTime') || '23:00';
-            latestSleepTime = sleepTime;
-
-            // Default schedule settings (can be loaded from local storage later)
+            // 初始加载或默认日程设置
             const defaultSchedule = [
                 { start: '08:00', end: '09:00', label: '起床' },
                 { start: '09:00', end: '12:00', label: '工作' },
-                { start: '12:00', end: '13:00', label: '午休' },
+                { start: '12:00', end: '13:00', label: '午餐' },
                 { start: '13:00', end: '17:00', label: '工作' },
-                { start: '17:00', end: '18:00', label: '锻炼' },
+                { start: '17:00', end: '18:00', label: '休息' },
                 { start: '18:00', end: '19:00', label: '晚餐' },
-                { start: '19:00', end: '22:30', label: '休闲' },
+                { start: '19:00', end: '22:30', label: '学习' },
             ];
-            schedule = defaultSchedule;
-            renderSchedule(); // Initial render
+
+            schedule = JSON.parse(localStorage.getItem('schedule')) || defaultSchedule;
+            renderSchedule();
 
             function updateCurrentTime() {
                 now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 currentTimeElement.textContent = `${hours}:${minutes}`;
-                updateDayProgress();
                 highlightCurrentSchedule();
             }
 
@@ -264,8 +273,6 @@
                 scheduleContainer.innerHTML = '';
                 const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                 const minutesInDay = 24 * 60;
-
-                schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
 
                 schedule.forEach(item => {
                     const startTimeMinutes = timeToMinutes(item.start);
@@ -282,20 +289,19 @@
                     scheduleItem.style.width = `${width}px`;
                     scheduleItem.draggable = true;
 
-                    if (timeToMinutes(item.end) > timeToMinutes(latestSleepTime)) {
+                    if (item.end > latestSleepTime) {
                         scheduleItem.classList.add('late');
-                    } else {
-                        scheduleItem.classList.remove('late');
                     }
 
-                    scheduleItem.addEventListener('mousedown', startDrag);
                     scheduleContainer.appendChild(scheduleItem);
+
+                    // 拖动开始
+                    scheduleItem.addEventListener('mousedown', (e) => {
+                        isDraggingScheduleItem = true;
+                        draggedScheduleItem = e.target;
+                        dragScheduleOffsetX = e.clientX - draggedScheduleItem.offsetLeft;
+                    });
                 });
-                if (schedule.length > 0) {
-                    scheduleContainer.classList.add('show');
-                } else {
-                    scheduleContainer.classList.remove('show');
-                }
             }
 
             function highlightCurrentSchedule() {
@@ -323,139 +329,139 @@
                 return `${hours}:${minutes}`;
             }
 
-            function startFocus() {
+            function startFocusTimer() {
                 isFocusing = true;
-                focusTimerSection.classList.add('show');
-                elapsedFocusTime = 0;
-                focusStartTime = Date.now();
-                startFocusButton.textContent = '专注中';
-                startFocusButton.classList.add('running');
-                startRestButton.classList.remove('hidden');
-                progressBar.classList.remove('overtime');
+                const focusTime = parseInt(focusDurationInput.value, 10) * 60;
+                totalFocusTime = focusTime;
+                remainingTime = focusTime;
+                startStopButton.textContent = '停止';
+                startStopButton.classList.add('running');
                 updateTimerDisplay();
-                focusInterval = setInterval(updateFocusTimer, 1000);
+                startInterval();
             }
 
-            function updateFocusTimer() {
-                const nowTime = Date.now();
-                elapsedFocusTime = Math.floor((nowTime - focusStartTime) / 1000);
+            function startBreakTimer(durationMinutes) {
+                isFocusing = false;
+                const breakTime = durationMinutes * 60;
+                totalFocusTime = breakTime;
+                remainingTime = breakTime;
+                startStopButton.textContent = '跳过休息';
                 updateTimerDisplay();
-                const initialFocusTime = 25 * 60; // Example initial focus time
-                if (elapsedFocusTime > initialFocusTime) {
-                    progressBar.classList.add('overtime');
-                } else {
-                    progressBar.classList.remove('overtime');
-                }
+                startInterval();
             }
 
-            function startRest() {
+            function stopTimer() {
                 clearInterval(focusInterval);
                 isFocusing = false;
-                startFocusButton.textContent = '开始专注';
-                startFocusButton.classList.remove('running');
-                startRestButton.classList.add('hidden');
+                startStopButton.textContent = '开始';
+                startStopButton.classList.remove('running');
+                progressBar.style.width = '0%';
                 progressBar.classList.remove('overtime');
-                focusTimerSection.classList.remove('show');
+                progressBar.textContent = '';
+            }
+
+            function startInterval() {
+                focusInterval = setInterval(() => {
+                    remainingTime--;
+                    updateTimerDisplay();
+                    updateProgressBar();
+
+                    if (remainingTime < 0) {
+                        clearInterval(focusInterval);
+                        progressBar.classList.add('overtime');
+                        progressBar.textContent = '超时';
+                    }
+                }, 1000);
             }
 
             function updateTimerDisplay() {
-                const minutes = String(Math.floor(elapsedFocusTime / 60)).padStart(2, '0');
-                const seconds = String(elapsedFocusTime % 60).padStart(2, '0');
+                const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
+                const seconds = String(remainingTime % 60).padStart(2, '0');
                 timerDisplay.textContent = `${minutes}:${seconds}`;
-                const initialFocusTime = 25 * 60; // Example initial focus time for progress
-                const progress = initialFocusTime > 0 ? Math.min(1, elapsedFocusTime / initialFocusTime) * 100 : 0;
-                progressBar.style.width = `${progress}%`;
             }
 
-            startFocusButton.addEventListener('click', () => {
-                if (!isFocusing) {
-                    startFocus();
+            function updateProgressBar() {
+                const progress = Math.max(0, (totalFocusTime - remainingTime) / totalFocusTime) * 100;
+                progressBar.style.width = `${progress}%`;
+                const displayedMinutes = String(Math.floor(totalFocusTime / 60)).padStart(2, '0');
+                const displayedSeconds = String(totalFocusTime % 60).padStart(2, '0');
+                progressBar.textContent = `${displayedMinutes}:${displayedSeconds}`;
+            }
+
+            startStopButton.addEventListener('click', () => {
+                if (isFocusing) {
+                    stopTimer();
                 } else {
-                    startRest(); // Allow stopping focus by clicking start again
+                    if (!isFocusActive) {
+                        isFocusActive = true;
+                        focusTimerSection.classList.remove('hidden');
+                    }
+                    startFocusTimer();
                 }
             });
 
-            startRestButton.addEventListener('click', startRest);
+            // 初始化日程
+            setInterval(updateCurrentTime, 60000);
+            updateCurrentTime();
 
-            function updateDayProgress() {
-                const nowMinutes = now.getHours() * 60 + now.getMinutes();
-                const minutesInDay = 24 * 60;
-                const progress = (nowMinutes / minutesInDay) * 100;
-                progressBar.style.width = `${progress}%`;
+            // 拖动事件
+            document.addEventListener('mousemove', (e) => {
+                if (!isDraggingScheduleItem) return;
+                if (!draggedScheduleItem) return;
 
-                const sleepTimeMinutes = timeToMinutes(sleepTime);
-                const sleepProgress = (sleepTimeMinutes / minutesInDay) * 100;
-                progressBarSleep.style.width = `${sleepProgress}%`;
-            }
-
-            progressBarContainer.addEventListener('click', (e) => {
-                const rect = progressBarContainer.getBoundingClientRect();
-                const clickPosition = e.clientX - rect.left;
-                const containerWidth = rect.width;
-                const clickedPercentage = clickPosition / containerWidth;
-                const minutesInDay = 24 * 60;
-                const clickedMinutes = Math.round(clickedPercentage * minutesInDay);
-                const newSleepTime = minutesToTime(clickedMinutes);
-
-                sleepTime = newSleepTime;
-                latestSleepTime = newSleepTime;
-                localStorage.setItem('sleepTime', newSleepTime);
-                updateDayProgress();
-                renderSchedule();
-            });
-
-            function startDrag(e) {
-                isDragging = true;
-                draggedItem = e.target;
-                dragStartOffset = e.clientX - draggedItem.offsetLeft;
-                document.addEventListener('mousemove', dragMove);
-                document.addEventListener('mouseup', dragEnd);
-            }
-
-            function dragMove(e) {
-                if (!isDragging || !draggedItem) return;
                 const containerRect = document.getElementById('top-time-bar').getBoundingClientRect();
-                let newLeft = e.clientX - containerRect.left - dragStartOffset;
-                const itemWidth = draggedItem.offsetWidth;
+                let newLeft = e.clientX - containerRect.left - dragScheduleOffsetX;
 
                 if (newLeft < 0) {
                     newLeft = 0;
                 }
-                if (newLeft + itemWidth > containerRect.width) {
-                    newLeft = containerRect.width - itemWidth;
+                if (newLeft + draggedScheduleItem.offsetWidth > containerRect.width) {
+                    newLeft = containerRect.width - draggedScheduleItem.offsetWidth;
                 }
 
-                draggedItem.style.left = `${newLeft}px`;
-            }
+                draggedScheduleItem.style.left = `${newLeft}px`;
+            });
 
-            function dragEnd() {
-                if (!isDragging) return;
-                document.removeEventListener('mousemove', dragMove);
-                document.removeEventListener('mouseup', dragEnd);
+            document.addEventListener('mouseup', () => {
+                if (isDraggingScheduleItem && draggedScheduleItem) {
+                    const containerWidth = document.getElementById('top-time-bar').offsetWidth;
+                    const minutesInDay = 24 * 60;
+                    const leftPercentage = draggedScheduleItem.offsetLeft / containerWidth;
+                    const widthPercentage = draggedScheduleItem.offsetWidth / containerWidth;
 
-                const containerWidth = document.getElementById('top-time-bar').offsetWidth;
-                const minutesInDay = 24 * 60;
-                const leftPercentage = draggedItem.offsetLeft / containerWidth;
-                const widthPercentage = draggedItem.offsetWidth / containerWidth;
+                    const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10;
+                    const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
 
-                const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10;
-                const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
+                    const index = Array.from(scheduleContainer.children).indexOf(draggedScheduleItem);
+                    if (index !== -1) {
+                        schedule[index].start = minutesToTime(newStartTimeMinutes);
+                        schedule[index].end = minutesToTime(newEndTimeMinutes);
+                        schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+                        localStorage.setItem('schedule', JSON.stringify(schedule));
+                        renderSchedule();
+                    }
 
-                const index = Array.from(scheduleContainer.children).indexOf(draggedItem);
-                if (index !== -1) {
-                    schedule[index].start = minutesToTime(newStartTimeMinutes);
-                    schedule[index].end = minutesToTime(newEndTimeMinutes);
-                    schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
-                    renderSchedule();
+                    isDraggingScheduleItem = false;
+                    draggedScheduleItem = null;
                 }
+            });
 
-                isDragging = false;
-                draggedItem = null;
-            }
+            // 设置睡眠时间
+            sleepTimeSetter.addEventListener('click', () => {
+                const newSleepTime = prompt('请输入您的期望睡眠时间 (HH:MM)', latestSleepTime);
+                if (newSleepTime) {
+                    latestSleepTime = newSleepTime;
+                    localStorage.setItem('sleepTime', latestSleepTime);
+                    renderSchedule(); // 重新渲染以更新晚睡标记
+                }
+            });
 
-            // Initialization
-            updateCurrentTime();
-            setInterval(updateCurrentTime, 60000);
+            // 点击进度条显示/隐藏专注时间设置
+            const progressBarContainer = document.getElementById('progress-bar-container');
+            progressBarContainer.addEventListener('click', () => {
+                isFocusActive = !isFocusActive;
+                focusTimerSection.classList.toggle('hidden', !isFocusActive);
+            });
         });
     </script>
 </body>
