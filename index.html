@@ -14,7 +14,7 @@
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            -webkit-user-select: none; /* 禁止选中文本 */
+            -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
@@ -77,7 +77,7 @@
             flex-shrink: 0;
             position: absolute;
             top: 0;
-            transition: background-color 0.3s ease;
+            transition: left 0.1s ease-out, width 0.1s ease-out, background-color 0.3s ease;
         }
 
         .schedule-item.late {
@@ -200,7 +200,7 @@
             <div id="schedule-container"></div>
         </div>
 
-        <div id="focus-timer" class="hidden">
+        <div id="focus-timer">
             <h2>专注时间</h2>
             <div class="input-group">
                 <label for="focus-duration">专注时长 (分钟):</label>
@@ -237,13 +237,11 @@
             let isDragging = false;
             let draggedItem = null;
             let dragStartOffset;
-            let dragEdge = null; // 'start' or 'end'
             let focusInterval;
-            let remainingTime;
+            let remainingTime = 0; // Initialize remainingTime
             let isFocusing = false;
             let focusStartTime;
             let totalFocusTimeSet;
-            let restTimeout;
 
             // Load sleep time from local storage
             let sleepTime = localStorage.getItem('sleepTime') || '23:00';
@@ -266,12 +264,15 @@
                 now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                currentTimeElement.textContent = `${hours}:${minutes}`;
+                if (currentTimeElement) {
+                    currentTimeElement.textContent = `${hours}:${minutes}`;
+                }
                 updateDayProgress();
                 highlightCurrentSchedule();
             }
 
             function renderSchedule() {
+                if (!scheduleContainer) return;
                 scheduleContainer.innerHTML = '';
                 const containerWidth = document.getElementById('top-time-bar').offsetWidth;
                 const minutesInDay = 24 * 60;
@@ -295,14 +296,7 @@
                         scheduleItem.classList.add('late');
                     }
 
-                    // Dragging to move
-                    scheduleItem.addEventListener('mousedown', (e) => {
-                        if (e.target === scheduleItem) {
-                            isDragging = true;
-                            draggedItem = e.target;
-                            dragStartOffset = e.clientX - draggedItem.offsetLeft;
-                        }
-                    });
+                    scheduleItem.addEventListener('mousedown', startDrag);
 
                     scheduleContainer.appendChild(scheduleItem);
                 });
@@ -335,13 +329,19 @@
 
             function startFocus() {
                 isFocusing = true;
-                focusTimerSection.classList.remove('hidden');
+                if (focusTimerSection) {
+                    focusTimerSection.classList.remove('hidden');
+                }
                 totalFocusTimeSet = parseInt(focusDurationInput.value, 10) * 60;
-                remainingTime = 0; // Start counting up
+                remainingTime = 0;
                 focusStartTime = new Date().getTime();
-                startFocusButton.textContent = '专注中...';
-                startFocusButton.classList.add('running');
-                startRestButton.classList.remove('hidden');
+                if (startFocusButton) {
+                    startFocusButton.textContent = '专注中...';
+                    startFocusButton.classList.add('running');
+                }
+                if (startRestButton) {
+                    startRestButton.classList.remove('hidden');
+                }
                 updateTimerDisplay();
                 focusInterval = setInterval(updateFocusTimer, 1000);
             }
@@ -355,67 +355,93 @@
             function startRest() {
                 clearInterval(focusInterval);
                 isFocusing = false;
-                startFocusButton.textContent = '开始专注';
-                startFocusButton.classList.remove('running');
-                startRestButton.classList.add('hidden');
+                if (startFocusButton) {
+                    startFocusButton.textContent = '开始专注';
+                    startFocusButton.classList.remove('running');
+                }
+                if (startRestButton) {
+                    startRestButton.classList.add('hidden');
+                }
 
                 const actualFocusTime = remainingTime;
-                const restDuration = Math.min(30 * 60, Math.max(5 * 60, Math.floor(actualFocusTime / 5))); // Dynamic rest time (min 5, max 30 mins)
-                timerDisplay.textContent = `${String(Math.floor(restDuration / 60)).padStart(2, '0')}:${String(restDuration % 60).padStart(2, '0')}`;
-                progressBar.style.width = '100%';
+                const restDuration = Math.min(30 * 60, Math.max(5 * 60, Math.floor(actualFocusTime / 5)));
+                if (timerDisplay) {
+                    timerDisplay.textContent = `${String(Math.floor(restDuration / 60)).padStart(2, '0')}:${String(restDuration % 60).padStart(2, '0')}`;
+                }
+                if (progressBar) {
+                    progressBar.style.width = '100%';
+                }
 
                 alert('专注结束，休息一下！');
-                // Optionally, you could implement a visual countdown for the rest period here.
             }
 
             function updateTimerDisplay() {
                 const minutes = String(Math.floor(remainingTime / 60)).padStart(2, '0');
                 const seconds = String(remainingTime % 60).padStart(2, '0');
-                timerDisplay.textContent = `${minutes}:${seconds}`;
+                if (timerDisplay) {
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                }
                 const progress = totalFocusTimeSet > 0 ? Math.min(1, remainingTime / totalFocusTimeSet) * 100 : 0;
-                progressBar.style.width = `${progress}%`;
+                if (progressBar) {
+                    progressBar.style.width = `${progress}%`;
+                }
             }
 
-            startFocusButton.addEventListener('click', () => {
-                if (!isFocusing) {
-                    startFocus();
-                }
-            });
+            if (startFocusButton) {
+                startFocusButton.addEventListener('click', () => {
+                    if (!isFocusing) {
+                        startFocus();
+                    }
+                });
+            }
 
-            startRestButton.addEventListener('click', startRest);
+            if (startRestButton) {
+                startRestButton.addEventListener('click', startRest);
+            }
 
             function updateDayProgress() {
                 const nowMinutes = now.getHours() * 60 + now.getMinutes();
                 const minutesInDay = 24 * 60;
                 const progress = (nowMinutes / minutesInDay) * 100;
-                progressBarContainer.querySelector('#progress-bar').style.width = `${progress}%`;
+                if (progressBarContainer && progressBarContainer.querySelector('#progress-bar')) {
+                    progressBarContainer.querySelector('#progress-bar').style.width = `${progress}%`;
+                }
 
                 const sleepTimeMinutes = timeToMinutes(sleepTime);
                 const sleepProgress = (sleepTimeMinutes / minutesInDay) * 100;
-                progressBarSleep.style.width = `${sleepProgress}%`;
+                if (progressBarSleep) {
+                    progressBarSleep.style.width = `${sleepProgress}%`;
+                }
             }
 
-            progressBarContainer.addEventListener('click', (e) => {
-                const rect = progressBarContainer.getBoundingClientRect();
-                const clickPosition = e.clientX - rect.left;
-                const containerWidth = rect.width;
-                const clickedPercentage = clickPosition / containerWidth;
-                const minutesInDay = 24 * 60;
-                const clickedMinutes = Math.round(clickedPercentage * minutesInDay);
-                const newSleepTime = minutesToTime(clickedMinutes);
+            if (progressBarContainer) {
+                progressBarContainer.addEventListener('click', (e) => {
+                    const rect = progressBarContainer.getBoundingClientRect();
+                    const clickPosition = e.clientX - rect.left;
+                    const containerWidth = rect.width;
+                    const clickedPercentage = clickPosition / containerWidth;
+                    const minutesInDay = 24 * 60;
+                    const clickedMinutes = Math.round(clickedPercentage * minutesInDay);
+                    const newSleepTime = minutesToTime(clickedMinutes);
 
-                sleepTime = newSleepTime;
-                latestSleepTime = newSleepTime;
-                localStorage.setItem('sleepTime', newSleepTime);
-                updateDayProgress();
-                renderSchedule(); // Re-render to update 'late' class
-            });
+                    sleepTime = newSleepTime;
+                    latestSleepTime = newSleepTime;
+                    localStorage.setItem('sleepTime', newSleepTime);
+                    updateDayProgress();
+                    renderSchedule();
+                });
+            }
 
-            // Dragging Logic
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                if (!draggedItem) return;
+            function startDrag(e) {
+                isDragging = true;
+                draggedItem = e.target;
+                dragStartOffset = e.clientX - draggedItem.offsetLeft;
+                document.addEventListener('mousemove', dragMove);
+                document.addEventListener('mouseup', dragEnd);
+            }
 
+            function dragMove(e) {
+                if (!isDragging || !draggedItem) return;
                 const containerRect = document.getElementById('top-time-bar').getBoundingClientRect();
                 let newLeft = e.clientX - containerRect.left - dragStartOffset;
                 const itemWidth = draggedItem.offsetWidth;
@@ -428,31 +454,32 @@
                 }
 
                 draggedItem.style.left = `${newLeft}px`;
-            });
+            }
 
-            document.addEventListener('mouseup', () => {
-                if (isDragging && draggedItem) {
-                    const containerWidth = document.getElementById('top-time-bar').offsetWidth;
-                    const minutesInDay = 24 * 60;
-                    const leftPercentage = draggedItem.offsetLeft / containerWidth;
-                    const widthPercentage = draggedItem.offsetWidth / containerWidth;
+            function dragEnd() {
+                if (!isDragging) return;
+                document.removeEventListener('mousemove', dragMove);
+                document.removeEventListener('mouseup', dragEnd);
 
-                    const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10;
-                    const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
+                const containerWidth = document.getElementById('top-time-bar').offsetWidth;
+                const minutesInDay = 24 * 60;
+                const leftPercentage = draggedItem.offsetLeft / containerWidth;
+                const widthPercentage = draggedItem.offsetWidth / containerWidth;
 
-                    const index = Array.from(scheduleContainer.children).indexOf(draggedItem);
-                    if (index !== -1) {
-                        schedule[index].start = minutesToTime(newStartTimeMinutes);
-                        schedule[index].end = minutesToTime(newEndTimeMinutes);
-                        schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
-                        renderSchedule();
-                    }
+                const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10;
+                const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
 
-                    isDragging = false;
-                    draggedItem = null;
-                    dragEdge = null;
+                const index = Array.from(scheduleContainer.children).indexOf(draggedItem);
+                if (index !== -1) {
+                    schedule[index].start = minutesToTime(newStartTimeMinutes);
+                    schedule[index].end = minutesToTime(newEndTimeMinutes);
+                    schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+                    renderSchedule();
                 }
-            });
+
+                isDragging = false;
+                draggedItem = null;
+            }
 
             // Initialization
             renderSchedule();
