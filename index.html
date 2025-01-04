@@ -17,9 +17,6 @@
         }
 
         .container {
-            background-color: #fff;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
             padding: 30px;
             width: 90%;
             max-width: 800px;
@@ -27,9 +24,7 @@
         }
 
         #top-time-bar {
-            background-color: #eee;
             padding: 15px;
-            border-radius: 5px;
             margin-bottom: 20px;
             position: relative;
             display: flex;
@@ -54,9 +49,7 @@
 
         #day-progress-container {
             flex-grow: 1;
-            height: 10px;
-            background-color: #ddd;
-            border-radius: 5px;
+            height: 8px; /* Slightly smaller day progress */
             margin: 0 15px;
             cursor: pointer;
             position: relative;
@@ -66,14 +59,13 @@
         #day-progress {
             height: 100%;
             background-color: #aaa;
-            border-radius: 5px;
             width: 0%;
             transition: width 0.3s ease-in-out;
         }
 
         #sleep-time-indicator {
             position: absolute;
-            top: -5px;
+            top: -6px;
             height: 20px;
             width: 2px;
             background-color: #888;
@@ -122,10 +114,7 @@
             top: 30px;
             left: 0;
             right: 0;
-            background-color: rgba(255, 255, 255, 0.9);
             padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -166,15 +155,12 @@
         .time-spinner input[type="number"] {
             width: 50px;
             padding: 5px;
-            border-radius: 3px;
             border: 1px solid #ccc;
             text-align: center;
         }
 
         #focus-timer {
-            background-color: #eee;
             padding: 25px;
-            border-radius: 5px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -212,10 +198,6 @@
             gap: 10px;
         }
 
-        .duration-slider {
-            flex-grow: 1;
-        }
-
         .duration-control input[type="number"] {
             width: 50px;
         }
@@ -228,9 +210,7 @@
         }
 
         #progress-bar-container {
-             background-color: #ccc;
-             border-radius: 12.5px;
-            height: 25px;
+             height: 35px;
              margin-bottom: 20px;
             overflow: hidden;
             width: 100%;
@@ -242,7 +222,6 @@
              height: 100%;
              width: 0%;
             transition: width 0.3s ease-out, right 0.3s ease-out, background-color 0.3s ease-in-out;
-            border-radius: 12.5px;
             display: flex;
              align-items: center;
             justify-content: flex-start;
@@ -794,7 +773,7 @@
                 latestSleepTime = minutesToTime(newSleepMinutes);
                 localStorage.setItem('sleepTime', latestSleepTime);
                 updateDayProgress();
-                                renderSchedule();
+                renderSchedule();
                 sleepTimeTooltip.textContent = latestSleepTime;
                 displaySleepTime();
             }
@@ -893,7 +872,7 @@
                         value = 1;
                         transitionMultiplierInput.value = 1;
                     }
-                    if (value > 10) {
+                                     if (value > 10) {
                         value = 10;
                         transitionMultiplierInput.value = 10;
                     }
