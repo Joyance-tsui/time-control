@@ -8,8 +8,8 @@
         body {
             font-family: sans-serif;
             margin: 0;
-            background-color: #fff;
-            color: #000;
+            background-color: #f4f4f4; /* 淡灰色背景 */
+            color: #333;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,7 +27,7 @@
         }
 
         #top-time-bar {
-            background-color: #f0f0f0;
+            background-color: #eee; /* 稍亮的灰色 */
             padding: 15px;
             border-radius: 5px;
             margin-bottom: 20px;
@@ -55,7 +55,7 @@
 
         #day-progress {
             height: 100%;
-            background-color: #bbb;
+            background-color: #aaa;
             border-radius: 5px;
             width: 0%;
             transition: width 0.3s ease-in-out;
@@ -88,7 +88,7 @@
         }
 
         .schedule-item {
-            background-color: #999;
+            background-color: #bbb; /* 更柔和的颜色 */
             color: #fff;
             padding: 8px 12px;
             border-radius: 5px;
@@ -104,7 +104,7 @@
         }
 
         .schedule-item.late {
-            background-color: #555;
+            background-color: #999; /* 稍暗的颜色 */
         }
 
         #sleep-time-settings {
@@ -162,7 +162,7 @@
         }
 
         #focus-timer {
-            background-color: #f0f0f0;
+            background-color: #eee; /* 稍亮的灰色 */
             padding: 25px;
             border-radius: 5px;
             display: flex;
@@ -213,13 +213,14 @@
             margin-bottom: 20px;
             overflow: hidden;
             width: 100%;
+            position: relative; /* 添加相对定位 */
         }
 
         #progress-bar {
             background-color: #888;
             height: 100%;
             width: 0%;
-            transition: width 0.05s linear; /* 更流畅的过渡 */
+            transition: width 0.05s linear;
             border-radius: 10px;
             display: flex;
             align-items: center;
@@ -229,10 +230,14 @@
             white-space: nowrap;
             padding: 0 10px;
             box-sizing: border-box;
+            position: absolute; /* 改为绝对定位 */
+            left: 0; /* 初始位置在左边 */
         }
 
         #progress-bar.overtime {
             background-color: #555;
+            left: auto; /* 超时后从右边开始 */
+            right: 0;
         }
 
         #start-stop-button {
@@ -355,7 +360,7 @@
             <div class="controls-container hidden">
                 <button id="pause-button">暂停</button>
                 <button id="reset-button">重置</button>
-                <button id="break-button" class="hidden">休息</button>
+                <button id="break-button">休息</button>
             </div>
         </div>
     </div>
@@ -411,6 +416,7 @@
             let breakInterval;
             let remainingBreakTime;
             let breakStartTime;
+            let totalBreakTime;
 
             function updateCurrentTime() {
                 now = new Date();
@@ -493,7 +499,6 @@
                 isFocusing = true;
                 isPaused = false;
                 isOvertime = false;
-                breakButton.classList.add('hidden');
                 const focusTime = parseInt(focusDurationInput.value, 10) * 60;
                 totalFocusTime = focusTime;
                 remainingTime = focusTime;
@@ -501,6 +506,7 @@
                 startStopButton.textContent = '停止';
                 startStopButton.classList.add('running');
                 controlsContainer.classList.remove('hidden');
+                breakButton.textContent = '休息';
                 updateTimerDisplay();
                 focusInterval = setInterval(updateTimerDisplay, 100);
                 focusSettingsSummary.style.display = 'flex';
@@ -516,7 +522,6 @@
                 startStopButton.textContent = '开始';
                 startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
-                breakButton.classList.add('hidden');
                 updateProgressBar();
             }
 
@@ -530,12 +535,12 @@
                 } else if (isFocusing && isPaused) {
                     isPaused = false;
                     startStopButton.textContent = '停止';
-                    if (isOvertime) {
-                        focusInterval = setInterval(updateTimerDisplay, 100);
-                    } else {
-                        focusStartTime = focusStartTime + (Date.now() - pauseStartTime);
-                        focusInterval = setInterval(updateTimerDisplay, 100);
-                    }
+                    focusStartTime = focusStartTime + (Date.now() - pauseStartTime);
+                    focusInterval = setInterval(updateTimerDisplay, 100);
+                } else if (!isFocusing && remainingBreakTime > 0 && isPaused) {
+                    isPaused = false;
+                    breakStartTime = breakStartTime + (Date.now() - pauseStartTime);
+                    breakInterval = setInterval(updateTimerDisplay, 100);
                 }
             }
 
@@ -551,29 +556,24 @@
                     const elapsedMilliseconds = Date.now() - focusStartTime;
                     remainingTime = totalFocusTime - Math.floor(elapsedMilliseconds / 1000);
 
-                    if (remainingTime <= 0 && !isOvertime) {
-                        clearInterval(focusInterval);
+                    if (remainingTime <= 0) {
                         isOvertime = true;
-                        breakButton.classList.remove('hidden');
-                        remainingTime = Math.abs(remainingTime); // Start counting up for overtime
-                        focusStartTime = Date.now() - (remainingTime * 1000); // Adjust start time for overtime calculation
-                        focusInterval = setInterval(updateTimerDisplay, 100); // Continue updating
                     }
 
-                    let displaySeconds;
-                    if (!isOvertime) {
-                        displaySeconds = Math.max(0, remainingTime);
-                    } else {
-                        displaySeconds = Math.floor(elapsedMilliseconds / 1000) - totalFocusTime;
-                    }
-
-                    const minutes = String(Math.floor(Math.abs(displaySeconds) / 60)).padStart(2, '0');
-                    const seconds = String(Math.abs(displaySeconds) % 60).padStart(2, '0');
+                    let displaySeconds = Math.abs(remainingTime);
+                    const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
+                    const seconds = String(displaySeconds % 60).padStart(2, '0');
                     timerDisplay.textContent = isOvertime ? `-${minutes}:${seconds}` : `${minutes}:${seconds}`;
                     updateProgressBar();
-                } else if (!isFocusing && remainingBreakTime > 0) {
+                } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
-                    const displayedBreakSeconds = Math.max(0, Math.ceil(remainingBreakTime - elapsedBreakMilliseconds / 1000));
+                    const displayedBreakSeconds = Math.ceil(remainingBreakTime - elapsedBreakMilliseconds / 1000);
+                    if (displayedBreakSeconds <= 0) {
+                        clearInterval(breakInterval);
+                        timerDisplay.textContent = '00:00';
+                        progressBar.style.width = '0%';
+                        return;
+                    }
                     const minutes = String(Math.floor(displayedBreakSeconds / 60)).padStart(2, '0');
                     const seconds = String(displayedBreakSeconds % 60).padStart(2, '0');
                     timerDisplay.textContent = `${minutes}:${seconds}`;
@@ -588,20 +588,23 @@
                     if (!isOvertime) {
                         progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
                         progressBar.classList.remove('overtime');
+                        progressBar.style.left = '0%';
+                        progressBar.style.width = `${progress}%`;
                     } else {
-                        progress = 100 + (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000) * 100;
+                        const overtimeProgress = (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000) * 100;
                         progressBar.classList.add('overtime');
+                        progressBar.style.width = `${overtimeProgress}%`;
                     }
-                    progressBar.style.width = `${progress}%`;
                 } else if (!isFocusing && remainingBreakTime > 0) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
-                    const breakDurationSeconds = remainingBreakTime / 1000 + elapsedBreakMilliseconds / 1000; // Approximate total break duration
-                    const progress = Math.min(1, elapsedBreakMilliseconds / (breakDurationSeconds * 1000)) * 100;
-                    progressBar.style.width = `${progress}%`;
+                    const progress = Math.min(1, elapsedBreakMilliseconds / totalBreakTime) * 100;
                     progressBar.classList.remove('overtime');
+                    progressBar.style.left = '0%';
+                    progressBar.style.width = `${progress}%`;
                 } else {
                     progressBar.style.width = '0%';
                     progressBar.classList.remove('overtime');
+                    progressBar.style.left = '0%';
                 }
             }
 
@@ -614,32 +617,47 @@
             });
 
             pauseButton.addEventListener('click', () => {
-                if (isFocusing) {
-                    pauseTimer();
-                }
+                pauseTimer();
             });
 
             resetButton.addEventListener('click', resetTimer);
 
-            function startBreakTimer() {
+            function startBreakTimer(earlyBreak = false) {
                 clearInterval(focusInterval);
                 isFocusing = false;
                 isPaused = false;
+
+                let breakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000; // 默认休息时间
+
+                if (earlyBreak && remainingTime > 0) {
+                    breakDuration = Math.max(0, breakDuration - remainingTime * 1000);
+                } else if (isOvertime) {
+                    const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
+                    const overtimeRatio = overtimeMilliseconds / (totalFocusTime * 1000);
+                    breakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000 * (1 + overtimeRatio);
+                }
+
+                totalBreakTime = breakDuration;
+                remainingBreakTime = breakDuration;
+                breakStartTime = Date.now();
                 startStopButton.textContent = '开始';
                 startStopButton.classList.remove('running');
-                breakButton.classList.add('hidden');
-
-                const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
-                const overtimeMinutes = Math.ceil(overtimeMilliseconds / (60 * 1000));
-                const baseBreakTime = parseInt(breakDurationInput.value, 10);
-                const dynamicBreakTime = baseBreakTime + overtimeMinutes;
-                remainingBreakTime = dynamicBreakTime * 60 * 1000; // Store in milliseconds
-                breakStartTime = Date.now();
+                controlsContainer.classList.add('hidden');
+                breakButton.textContent = '跳过休息';
                 updateTimerDisplay();
                 breakInterval = setInterval(updateTimerDisplay, 100);
             }
 
-            breakButton.addEventListener('click', startBreakTimer);
+            breakButton.addEventListener('click', () => {
+                if (isFocusing) {
+                    startBreakTimer(true); // 提前开始休息
+                } else if (remainingBreakTime > 0) {
+                    clearInterval(breakInterval);
+                    remainingBreakTime = 0;
+                    timerDisplay.textContent = '00:00';
+                    progressBar.style.width = '0%';
+                }
+            });
 
             // ----- 睡眠时间设置 -----
             dayProgressContainer.addEventListener('click', () => {
@@ -660,7 +678,7 @@
                 const percentage = currentLeft / rect.width;
                 dragStartSleepMinutes = Math.round(percentage * 24 * 60);
                 sleepTimeTooltip.classList.remove('hidden');
-                sleepTimeTooltip.textContent = latestSleepTime; // 初始化显示
+                sleepTimeTooltip.textContent = latestSleepTime;
                 document.addEventListener('mousemove', dragSleepTime);
                 document.addEventListener('mouseup', stopDragSleepTime);
                 e.preventDefault();
@@ -674,13 +692,13 @@
                 let newSleepMinutes = dragStartSleepMinutes + Math.round(percentageChange * 24 * 60);
 
                 if (newSleepMinutes < 0) newSleepMinutes = 0;
-                if (newSleepMinutes >= 24 * 60) newSleepMinutes = 24 * 60 -1; // 避免超出
+                if (newSleepMinutes >= 24 * 60) newSleepMinutes = 24 * 60 -1;
 
                 latestSleepTime = minutesToTime(newSleepMinutes);
                 localStorage.setItem('sleepTime', latestSleepTime);
                 updateDayProgress();
                 renderSchedule();
-                sleepTimeTooltip.textContent = latestSleepTime; // 更新 tooltip
+                sleepTimeTooltip.textContent = latestSleepTime;
             }
 
             function stopDragSleepTime() {
