@@ -51,6 +51,8 @@
             margin-top: 5px;
             display: flex;
             align-items: center;
+            overflow-x: auto; /* 允许水平滚动 */
+            padding: 0 10px; /* 增加一些内边距 */
         }
 
         .schedule-item {
@@ -61,13 +63,14 @@
             margin-right: 5px;
             font-size: 0.9em;
             cursor: grab;
-            position: absolute;
+            /* position: absolute;  移除绝对定位 */
             top: 0;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            flex-shrink: 0; /* 防止项目被压缩 */
         }
 
         .schedule-item.late {
@@ -78,6 +81,7 @@
             background-color: #eee;
             padding: 25px;
             border-radius: 5px;
+            margin-top: 20px; /* 增加与上方元素的间距 */
         }
 
         #focus-timer h2 {
