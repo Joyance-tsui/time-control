@@ -64,7 +64,6 @@
         #sleep-time-indicator {
             position: absolute;
             top: -5px;
-            margin-left: -1px; /* 稍微调整位置 */
             height: 20px;
             width: 2px;
             background-color: #888;
@@ -75,7 +74,7 @@
             align-items: center;
         }
 
-        #sleep-time-display {
+         #sleep-time-display {
             position: absolute;
             top: -25px;
             background-color: rgba(0, 0, 0, 0.7);
@@ -84,6 +83,7 @@
             border-radius: 3px;
             font-size: 0.8em;
             white-space: nowrap;
+           margin-left: 5px; /* 新增：设置左边距 */
         }
 
         #sleep-time-indicator:active {
@@ -190,6 +190,10 @@
             gap: 20px;
             margin-bottom: 15px;
             cursor: pointer;
+        }
+
+        #focus-settings-summary.locked {
+            cursor: not-allowed;
         }
 
         .setting-label {
@@ -365,8 +369,8 @@
                 </div>
                 <div class="duration-control">
                     <label for="break-multiplier-slider">休息倍率:</label>
-                    <input type="range" id="break-multiplier-slider" min="1" max="5" value="1" step="0.1" class="duration-slider">
-                    <input type="number" id="break-multiplier" min="1" max="5" value="1" step="0.1">
+                    <input type="range" id="break-multiplier-slider" min="0.1" max="5" value="1" step="0.1" class="duration-slider">
+                    <input type="number" id="break-multiplier" min="0.1" max="5" value="1" step="0.1">
                 </div>
             </div>
             <div id="timer-display">00:00</div>
@@ -439,6 +443,7 @@
             let totalBreakTime;
             let baseBreakDuration;
             let breakTimeMultiplier = parseFloat(localStorage.getItem('breakTimeMultiplier')) || 1;
+            let settingsLocked = false;
 
             function updateCurrentTime() {
                 now = new Date();
@@ -458,13 +463,15 @@
                 updateSleepTimeIndicator();
             }
 
-            function updateSleepTimeIndicator() {
+           function updateSleepTimeIndicator() {
                 const minutesInDay = 24 * 60;
                 const sleepTimeMinutes = timeToMinutes(latestSleepTime);
                 const sleepPosition = (sleepTimeMinutes / minutesInDay) * dayProgressContainer.offsetWidth;
                 sleepTimeIndicator.style.left = `${sleepPosition}px`;
-                sleepTimeDisplay.textContent = latestSleepTime;
+                 sleepTimeDisplay.textContent = latestSleepTime;
+               
             }
+
 
             function renderSchedule() {
                 scheduleContainer.innerHTML = '';
@@ -536,6 +543,8 @@
                 updateProgressBar();
                 focusSettingsSummary.style.display = 'flex';
                 focusSettingsDetailed.style.display = 'none';
+                focusSettingsSummary.classList.add('locked');
+                settingsLocked = true;
             }
 
             function stopTimer() {
@@ -547,6 +556,8 @@
                 startStopButton.textContent = '开始';
                 startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
+                 focusSettingsSummary.classList.remove('locked');
+                settingsLocked = false;
                 updateProgressBar();
             }
 
@@ -695,10 +706,12 @@
             }
 
             dayProgressContainer.addEventListener('click', () => {
+               if(!settingsLocked){
                 sleepTimeSettings.classList.toggle('hidden');
-                if (!sleepTimeSettings.classList.contains('hidden')) {
+                 if (!sleepTimeSettings.classList.contains('hidden')) {
                     displaySleepTime();
                 }
+               }
             });
 
             sleepTimeIndicator.addEventListener('mousedown', (e) => {
@@ -771,10 +784,13 @@
             });
 
             // ----- 专注时间设置 -----
-            focusSettingsSummary.addEventListener('click', () => {
-                focusSettingsSummary.style.display = 'none';
-                focusSettingsDetailed.style.display = 'flex';
+           focusSettingsSummary.addEventListener('click', () => {
+                if (!settingsLocked) {
+                    focusSettingsSummary.style.display = 'none';
+                    focusSettingsDetailed.style.display = 'flex';
+                }
             });
+
 
             focusDurationSlider.addEventListener('input', () => {
                 focusDurationInput.value = focusDurationSlider.value;
@@ -796,27 +812,38 @@
                 breakDurationDisplay.textContent = breakDurationInput.value;
             });
 
+
             breakMultiplierSlider.addEventListener('input', () => {
                 breakMultiplierInput.value = breakMultiplierSlider.value;
                 breakTimeMultiplier = parseFloat(breakMultiplierSlider.value);
-                localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
+               localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
             });
 
-            breakMultiplierInput.addEventListener('change', () => {
-                breakMultiplierSlider.value = breakMultiplierInput.value;
-                breakTimeMultiplier = parseFloat(breakMultiplierInput.value);
-                localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
-            });
+             breakMultiplierInput.addEventListener('change', () => {
+                    let value = parseFloat(breakMultiplierInput.value);
+                    if (value < 0.1) {
+                        value = 0.1;
+                        breakMultiplierInput.value = 0.1;
+                    }
+                    if (value > 5) {
+                        value = 5;
+                         breakMultiplierInput.value = 5;
+                    }
+                     breakMultiplierSlider.value = value;
+                    breakTimeMultiplier = value;
+                     localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
 
-            breakMultiplierInput.value = breakTimeMultiplier;
+              });
+
+           breakMultiplierInput.value = breakTimeMultiplier;
             breakMultiplierSlider.value = breakTimeMultiplier;
-
+           
             // 初始渲染
             renderSchedule();
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
             updateDayProgress();
-            displaySleepTime();
+             displaySleepTime();
             focusDurationDisplay.textContent = focusDurationInput.value;
             breakDurationDisplay.textContent = breakDurationInput.value;
         });
