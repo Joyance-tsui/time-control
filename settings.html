@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>设置 - 时间管理助手</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>设置</h1>
+            <nav>
+                <a href="index.html">首页</a>
+            </nav>
+        </header>
+
+        <section class="settings">
+            <h2>每日时间设置</h2>
+            <form id="time-settings">
+                <div class="form-group">
+                    <label for="wake-up-time">起床时间:</label>
+                    <input type="time" id="wake-up-time" value="07:00" required>
+                </div>
+                <div class="form-group">
+                    <label for="sleep-time">最晚睡眠时间:</label>
+                    <input type="time" id="sleep-time" value="23:00" required>
+                </div>
+                <div id="custom-time-blocks">
+                    <h3>自定义时间段</h3>
+                    <button type="button" id="add-time-block">添加时间段</button>
+                    <div id="time-blocks-container">
+                        <!-- 自定义时间段将在这里生成 -->
+                    </div>
+                </div>
+                <button type="submit">保存每日设置</button>
+            </form>
+        </section>
+
+        <section class="timer-settings">
+            <h2>专注模式设置</h2>
+            <button type="button" id="add-timer-config">添加专注模式</button>
+            <div id="timer-configs-container">
+                <!-- 专注模式配置将在这里生成 -->
+            </div>
+        </section>
+    </div>
+    <script src="script.js"></script>
+    <script src="timer.js"></script>
+</body>
+</html>
