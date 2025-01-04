@@ -38,11 +38,11 @@
             cursor: pointer;
             transition: max-height 0.3s ease-in-out, padding 0.3s ease-in-out;
             overflow: hidden;
-            max-height: 60px; /* 初始高度 */
+            max-height: 60px;
         }
 
         #top-time-bar.expanded {
-            max-height: 200px; /* 展开后的高度 */
+            max-height: 200px;
             padding-bottom: 15px;
         }
 
@@ -75,7 +75,7 @@
             height: 20px;
             width: 2px;
             background-color: #888;
-            pointer-events: auto; /* 允许拖动 */
+            pointer-events: auto;
             cursor: grab;
         }
 
@@ -158,7 +158,6 @@
             margin-top: 5px;
             display: flex;
             align-items: center;
-            pointer-events: none;
         }
 
         .schedule-item {
@@ -175,6 +174,7 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+            cursor: grab; /* 指示可以拖动 */
         }
 
         .schedule-item.late {
@@ -202,6 +202,7 @@
             align-items: center;
             justify-content: space-between;
             width: 250px;
+            cursor: pointer; /* 指示可以点击编辑 */
         }
 
         .input-group label {
@@ -209,10 +210,6 @@
             font-weight: bold;
             text-align: left;
             flex-grow: 1;
-        }
-
-        .input-group.editable input[type="number"] {
-            cursor: pointer;
         }
 
         #timer-display {
@@ -362,9 +359,9 @@
 
         <div id="focus-timer">
             <h2>专注时间</h2>
-            <div class="input-group editable">
+            <div class="input-group">
                 <label for="focus-duration">专注时长 (分钟):</label>
-                <input type="number" id="focus-duration" value="25">
+                <input type="number" id="focus-duration" value="25" readonly style="cursor: pointer;">
             </div>
             <div id="focus-duration-controls" class="time-control-panel hidden">
                 <div class="time-selector">
@@ -427,7 +424,7 @@
             const controlsContainer = document.querySelector('.controls-container');
 
             let now;
-            let schedule = [];
+            let schedule = []; // 初始化为空数组
             let latestSleepTime = localStorage.getItem('sleepTime') || '23:00';
             let isDraggingSleepTime = false;
             let sleepTimeDragOffset;
@@ -437,6 +434,9 @@
             let remainingTime;
             let totalFocusTime;
             let focusStartTime;
+            let isDraggingScheduleItem = false;
+            let draggedScheduleItem = null;
+            let scheduleItemDragOffsetX;
 
             // 初始化滑动选择器
             function populateNumberOptions(container, start, end) {
@@ -447,13 +447,13 @@
                     option.addEventListener('click', function() {
                         const valueContainer = this.parentNode.parentNode.querySelector('.selector-value');
                         valueContainer.textContent = this.textContent;
-                        update সংশ্লিষ্টInput(valueContainer.dataset.unit, this.textContent);
+                        updateRelatedInput(valueContainer.dataset.unit, this.textContent);
                     });
                     container.appendChild(option);
                 }
             }
 
-            function update সংশ্লিষ্টInput(unit, value) {
+            function updateRelatedInput(unit, value) {
                 if (unit === 'hour') manualHourInput.value = value;
                 else if (unit === 'minute') manualMinuteInput.value = value;
                 else if (unit === 'minute-focus-major' || unit === 'minute-focus-minor') {
@@ -509,9 +509,18 @@
                     scheduleItem.textContent = item.label;
                     scheduleItem.style.left = `${startPosition}px`;
                     scheduleItem.style.width = `${width}px`;
+                    scheduleItem.draggable = true; // 允许拖动日程项
+
                     if (item.end > latestSleepTime) {
                         scheduleItem.classList.add('late');
                     }
+
+                    scheduleItem.addEventListener('mousedown', (e) => {
+                        isDraggingScheduleItem = true;
+                        draggedScheduleItem = e.target;
+                        scheduleItemDragOffsetX = e.clientX - draggedScheduleItem.offsetLeft;
+                    });
+
                     scheduleContainer.appendChild(scheduleItem);
                 });
             }
@@ -550,7 +559,7 @@
                 startStopButton.textContent = '停止';
                 startStopButton.classList.add('running');
                 controlsContainer.classList.remove('hidden');
-                focusDurationInputGroup.classList.add('hidden');
+                focusDurationControls.classList.add('hidden');
                 updateTimerDisplay();
                 updateProgressBar();
                 startInterval();
@@ -563,7 +572,7 @@
                 startStopButton.textContent = '开始';
                 startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
-                focusDurationInputGroup.classList.remove('hidden');
+                focusDurationControls.classList.remove('hidden');
                 progressBar.classList.remove('overtime');
                 progressBar.style.setProperty('--overtime-visual', '0%');
             }
@@ -696,18 +705,48 @@
 
             resetButton.addEventListener('click', resetTimer);
 
+            document.addEventListener('mousemove', (e) => {
+                if (!isDraggingScheduleItem) return;
+                if (!draggedScheduleItem) return;
+
+                const containerRect = dayProgressContainer.getBoundingClientRect();
+                let newLeft = e.clientX - containerRect.left - scheduleItemDragOffsetX;
+
+                if (newLeft < 0) {
+                    newLeft = 0;
+                }
+                if (newLeft + draggedScheduleItem.offsetWidth > containerRect.width) {
+                    newLeft = containerRect.width - draggedScheduleItem.offsetWidth;
+                }
+
+                draggedScheduleItem.style.left = `${newLeft}px`;
+            });
+
+            document.addEventListener('mouseup', () => {
+                if (isDraggingScheduleItem && draggedScheduleItem) {
+                    const containerWidth = dayProgressContainer.offsetWidth;
+                    const minutesInDay = 24 * 60;
+                    const leftPercentage = draggedScheduleItem.offsetLeft / containerWidth;
+                    const widthPercentage = draggedScheduleItem.offsetWidth / containerWidth;
+
+                    const newStartTimeMinutes = Math.round(leftPercentage * minutesInDay / 10) * 10; // 以 10 分钟为单位
+                    const newEndTimeMinutes = Math.round((leftPercentage + widthPercentage) * minutesInDay / 10) * 10;
+
+                    const index = Array.from(scheduleContainer.children).indexOf(draggedScheduleItem);
+                    if (index !== -1) {
+                        schedule[index].start = minutesToTime(newStartTimeMinutes);
+                        schedule[index].end = minutesToTime(newEndTimeMinutes);
+                        schedule.sort((a, b) => timeToMinutes(a.start) - timeToMinutes(b.start));
+                        renderSchedule();
+                    }
+
+                    isDraggingScheduleItem = false;
+                    draggedScheduleItem = null;
+                }
+            });
+
             // 初始化
-            const initialSchedule = [
-                { start: '08:00', end: '09:00', label: '起床/早餐' },
-                { start: '09:00', end: '12:00', label: '专注工作' },
-                { start: '12:00', end: '13:00', label: '午餐' },
-                { start: '13:00', end: '17:00', label: '项目开发' },
-                { start: '17:00', end: '18:00', label: '健身' },
-                { start: '18:00', end: '19:00', label: '晚餐' },
-                { start: '19:00', end: '22:30', label: '学习/休闲' },
-            ];
-            schedule = initialSchedule;
-            renderSchedule();
+            renderSchedule(); // 初始渲染，即使 schedule 为空
             updateCurrentTime();
             setInterval(updateCurrentTime, 60000);
             updateDayProgress();
