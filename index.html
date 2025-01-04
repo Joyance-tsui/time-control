@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>高级时间管理助手</title>
+    <title>时间管理助手</title>
     <style>
         body {
             font-family: sans-serif;
@@ -11,30 +11,55 @@
             background-color: #f0f0f0;
             color: #333;
             display: flex;
-            justify-content: center;
-            align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
             min-height: 100vh;
         }
 
         .container {
-            width: 80%;
+            width: 90%;
             max-width: 800px;
             background-color: #fff;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 8px;
             overflow: hidden;
+            margin-bottom: 20px;
         }
 
         header {
             background-color: #eee;
             padding: 20px;
             border-bottom: 1px solid #ccc;
+            text-align: center;
         }
 
         h2 {
             text-align: center;
             margin-bottom: 20px;
             color: #555;
+        }
+
+        .section-header {
+            background-color: #ddd;
+            padding: 10px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .section-header:hover {
+            background-color: #ccc;
+        }
+
+        .section-content {
+            padding: 20px;
+            display: none; /* 初始折叠 */
+        }
+
+        .section-content.active {
+            display: block;
         }
 
         /* Timeline Styles */
@@ -94,11 +119,6 @@
         }
 
         /* Settings Styles */
-        .settings {
-            padding: 20px;
-            border-bottom: 1px solid #ccc;
-        }
-
         .form-group {
             margin-bottom: 15px;
             display: flex;
@@ -121,115 +141,53 @@
             width: calc(100% - 160px);
         }
 
-        #custom-time-blocks {
+        #custom-time-blocks, #timer-configs-container {
             margin-top: 20px;
         }
 
-        #time-blocks-container {
+        #time-blocks-container, #timer-configs-container {
             margin-top: 10px;
         }
 
-        .custom-time-block-form {
+        .custom-time-block-form, .timer-config-form {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
             align-items: center;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
         }
 
         .custom-time-block-form input[type="time"],
-        .custom-time-block-form input[type="color"] {
+        .custom-time-block-form input[type="color"],
+        .timer-config-form input[type="number"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
         }
 
-        .settings button {
+        button {
             background-color: #555;
             color: #fff;
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
-            display: block;
-            margin: 20px auto 0;
+            margin-top: 10px;
         }
 
-        /* Task Management Styles */
-        .task-management {
-            padding: 20px;
-            border-bottom: 1px solid #ccc;
-        }
-
-        .add-task {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        #new-task {
-            flex-grow: 1;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        #task-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .task-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 0;
-            border-bottom: 1px dotted #ccc;
-        }
-
-        .task-item button {
-            background: none;
-            border: none;
-            cursor: pointer;
-            margin-left: 10px;
-            color: #888;
+        button:hover {
+            background-color: #777;
         }
 
         /* Focus Timer Styles */
-        .focus-timer {
-            padding: 20px;
-        }
-
-        .timer-controls {
-            display: flex;
-            justify-content: space-around;
-            margin-bottom: 20px;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .input-group label {
-            margin-bottom: 5px;
-            color: #777;
-        }
-
-        .input-group input[type="number"] {
-            width: 60px;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: center;
-        }
-
-        .task-selection {
+        .timer-selection {
             margin-bottom: 20px;
             text-align: center;
         }
 
-        .task-selection select {
+        .timer-selection select {
             padding: 8px;
             border-radius: 4px;
         }
@@ -278,90 +236,132 @@
             text-align: center;
         }
 
-        .timer-buttons button {
-            background-color: #555;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 0 10px;
-        }
-
-        .timer-buttons button:hover {
-            background-color: #777;
-        }
-
         .task-progress {
             text-align: center;
             color: #777;
+        }
+
+        /* Task Management Styles */
+        .add-task {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        #new-task {
+            flex-grow: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        #task-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .task-item button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+            color: #888;
+        }
+
+        /* Timer Settings */
+        .timer-config-form {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .timer-config-form .form-group {
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+
+        .timer-config-form .form-group label {
+            text-align: left;
+            width: auto;
+            margin-right: 0;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .timer-config-form input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
+            <h1>时间管理助手</h1>
+        </header>
+
+        <section class="timeline">
             <div class="timeline-container">
                 <div class="timeline-bar">
                     <div class="current-time-indicator"></div>
                 </div>
                 <div class="time-labels"></div>
             </div>
-        </header>
+        </section>
 
-        <section class="settings">
-            <h2>每日时间设置</h2>
-            <form id="time-settings">
-                <div class="form-group">
-                    <label for="wake-up-time">起床时间:</label>
-                    <input type="time" id="wake-up-time" value="07:00" required>
-                </div>
-                <div class="form-group">
-                    <label for="sleep-time">最晚睡眠时间:</label>
-                    <input type="time" id="sleep-time" value="23:00" required>
-                </div>
-                <div id="custom-time-blocks">
-                    <h3>自定义时间段</h3>
-                    <button type="button" id="add-time-block">添加时间段</button>
-                    <div id="time-blocks-container">
-                        <!-- 自定义时间段将在这里生成 -->
+        <div class="settings-section">
+            <div class="section-header" onclick="toggleSection('settings-content')">
+                <span>设置</span>
+                <span>▼</span>
+            </div>
+            <div id="settings-content" class="section-content">
+                <form id="time-settings">
+                    <h2>每日时间设置</h2>
+                    <div class="form-group">
+                        <label for="wake-up-time">起床时间:</label>
+                        <input type="time" id="wake-up-time" value="07:00" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="sleep-time">最晚睡眠时间:</label>
+                        <input type="time" id="sleep-time" value="23:00" required>
+                    </div>
+                    <div id="custom-time-blocks">
+                        <h3>自定义时间段</h3>
+                        <button type="button" id="add-time-block">添加时间段</button>
+                        <div id="time-blocks-container">
+                            <!-- 自定义时间段将在这里生成 -->
+                        </div>
+                    </div>
+                    <button type="submit">保存设置</button>
+                </form>
+
+                <div class="timer-settings">
+                    <h2>专注模式设置</h2>
+                    <button type="button" id="add-timer-config">添加专注模式</button>
+                    <div id="timer-configs-container">
+                        <!-- 专注模式配置将在这里生成 -->
                     </div>
                 </div>
-                <button type="submit">保存设置</button>
-            </form>
-        </section>
-
-        <section class="task-management">
-            <h2>任务管理</h2>
-            <div class="add-task">
-                <input type="text" id="new-task" placeholder="添加新任务">
-                <button id="add-task-button">添加</button>
             </div>
-            <ul id="task-list">
-                <!-- 任务列表将在这里生成 -->
-            </ul>
-        </section>
+        </div>
 
-        <section class="focus-timer">
-            <h2>专注时间钟</h2>
-            <div class="timer-controls">
-                <div class="input-group">
-                    <label for="focus-duration">专注时间 (分钟):</label>
-                    <input type="number" id="focus-duration" value="25">
-                </div>
-                <div class="input-group">
-                    <label for="break-duration">休息时间 (分钟):</label>
-                    <input type="number" id="break-duration" value="5">
-                </div>
-                <div class="input-group">
-                    <label for="pomodoros-per-task">番茄次数:</label>
-                    <input type="number" id="pomodoros-per-task" value="4">
-                </div>
-            </div>
-            <div class="task-selection">
-                <label for="selected-task">选择任务:</label>
-                <select id="selected-task">
-                    <option value="">-- 请选择任务 --</option>
+        <section class="focus-control">
+            <h2>专注时间</h2>
+            <div class="timer-selection">
+                <label for="selected-timer">选择专注模式:</label>
+                <select id="selected-timer">
+                    <option value="">-- 请选择 --</option>
                 </select>
             </div>
             <div class="timer-display">
@@ -381,466 +381,477 @@
                 <span>已完成番茄: <span id="completed-pomodoros">0</span> / <span id="total-pomodoros">0</span></span>
             </div>
         </section>
+
+        <section class="task-management">
+            <h2>任务列表</h2>
+            <ul id="task-list">
+                </ul>
+            <div class="add-task">
+                <input type="text" id="new-task" placeholder="添加新任务">
+                <button id="add-task-button">添加</button>
+            </div>
+        </section>
     </div>
 
     <audio id="notification-sound" preload="auto">
         <source src="notification.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
+        Your browser does not support theaudioelement.
     </audio>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // --- Cookie 工具函数 ---
-            function setCookie(name, value, days) {
-                const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
-                document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+        // --- Cookie 工具函数 ---
+        function setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 24 * 60 * 60 * 1000).toUTCString();
+            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/`;
+        }
+
+        function getCookie(name) {
+            const cookies = document.cookie.split('; ').find(cookie => cookie.startsWith(name + '='));
+            return cookies ? decodeURIComponent(cookies.split('=')[1]) : null;
+        }
+
+        // --- 声音提醒 ---
+        const notificationSound = document.getElementById('notification-sound');
+        function playNotificationSound() {
+            notificationSound.play();
+        }
+
+        // --- 折叠功能 ---
+        function toggleSection(sectionId) {
+            const sectionContent = document.getElementById(sectionId);
+            sectionContent.classList.toggle('active');
+        }
+
+        // --- 时间轴部分 ---
+        const timelineBar = document.querySelector('.timeline-bar');
+        const currentTimeIndicator = document.querySelector('.current-time-indicator');
+        const timeLabels = document.querySelector('.time-labels');
+
+        function updateTimeline() {
+            const now = new Date();
+            const startOfDay = new Date(now);
+            startOfDay.setHours(0, 0, 0, 0);
+            const elapsedMilliseconds = now - startOfDay;
+            const totalMillisecondsInDay = 24 * 60 * 60 * 1000;
+            const position = (elapsedMilliseconds / totalMillisecondsInDay) * 100;
+            currentTimeIndicator.style.left = `${position}%`;
+            updateTimeLabels();
+            renderTimeBlocks();
+        }
+
+        function updateTimeLabels() {
+            timeLabels.innerHTML = '';
+            for (let i = 0; i <= 24; i += 3) {
+                const label = document.createElement('span');
+                label.textContent = `${i < 10 ? '0' : ''}${i}:00`;
+                const labelPosition = (i / 24) * 100;
+                label.style.left = `calc(${labelPosition}% - ${label.offsetWidth / 2}px)`;
+                timeLabels.appendChild(label);
             }
+        }
 
-            function getCookie(name) {
-                const cookies = document.cookie.split('; ').find(cookie => cookie.startsWith(name + '='));
-                return cookies ? decodeURIComponent(cookies.split('=')[1]) : null;
+        function calculateTimeBlockPercentages(startTimeStr, endTimeStr) {
+            const [startHour, startMinute] = startTimeStr.split(':').map(Number);
+            const [endHour, endMinute] = endTimeStr.split(':').map(Number);
+            const startTotalMinutes = startHour * 60 + startMinute;
+            const endTotalMinutes = endHour * 60 + endMinute;
+            let startPercentage = (startTotalMinutes / (24 * 60)) * 100;
+            let endPercentage = (endTotalMinutes / (24 * 60)) * 100;
+            if (endTotalMinutes <= startTotalMinutes) {
+                endPercentage += 100; // 处理跨午夜的情况
             }
+            return [startPercentage, endPercentage];
+        }
 
-            function deleteCookie(name) {
-                document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+        function renderTimeBlocks() {
+            timelineBar.querySelectorAll('.time-block').forEach(block => block.remove());
+            const wakeUpTime = getCookie('wakeUpTime');
+            const sleepTime = getCookie('sleepTime');
+            if (wakeUpTime && sleepTime) {
+                renderSleepTimeBlock(wakeUpTime, sleepTime);
             }
-
-            // --- 声音提醒 ---
-            const notificationSound = document.getElementById('notification-sound');
-            function playNotificationSound() {
-                notificationSound.play();
-            }
-
-            // --- 时间轴部分 ---
-            const timelineBar = document.querySelector('.timeline-bar');
-            const currentTimeIndicator = document.querySelector('.current-time-indicator');
-            const timeLabels = document.querySelector('.time-labels');
-            const timeSettingsForm = document.getElementById('time-settings');
-            const wakeUpTimeInput = document.getElementById('wake-up-time');
-            const sleepTimeInput = document.getElementById('sleep-time');
-            const timeBlocksContainer = document.getElementById('time-blocks-container');
-            const addTimeBlockButton = document.getElementById('add-time-block');
-
-            let wakeUpTime, sleepTime, customTimeBlocks = [];
-
-            function updateTimeline() {
-                const now = new Date();
-                const startOfDay = new Date(now);
-                startOfDay.setHours(0, 0, 0, 0);
-                const elapsedMilliseconds = now - startOfDay;
-                const totalMillisecondsInDay = 24 * 60 * 60 * 1000;
-                const position = (elapsedMilliseconds / totalMillisecondsInDay) * 100;
-                currentTimeIndicator.style.left = `${position}%`;
-
-                updateTimeLabels();
-                renderTimeBlocks();
-            }
-
-            function updateTimeLabels() {
-                timeLabels.innerHTML = '';
-                for (let i = 0; i <= 24; i += 3) {
-                    const label = document.createElement('span');
-                    label.textContent = `${i < 10 ? '0' : ''}${i}:00`;
-                    const labelPosition = (i / 24) * 100;
-                    label.style.left = `calc(${labelPosition}% - ${label.offsetWidth / 2}px)`;
-                    timeLabels.appendChild(label);
-                }
-            }
-
-            function renderTimeBlocks() {
-                timelineBar.querySelectorAll('.time-block').forEach(block => block.remove());
-
-                // 睡眠时间
-                renderSleepTimeBlock();
-
-                // 自定义时间段
-                customTimeBlocks.forEach(blockData => {
-                    renderCustomTimeBlock(blockData);
-                });
-            }
-
-            function renderSleepTimeBlock() {
-                const sleepBlock = document.createElement('div');
-                sleepBlock.classList.add('time-block', 'sleep-time');
-                const [sleepStartPercentage, sleepEndPercentage] = calculateTimeBlockPercentages(wakeUpTime, sleepTime);
-                if (sleepStartPercentage !== null && sleepEndPercentage !== null) {
-                    sleepBlock.style.left = `${sleepStartPercentage}%`;
-                    sleepBlock.style.width = `${sleepEndPercentage - sleepStartPercentage}%`;
-                    timelineBar.appendChild(sleepBlock);
-                }
-            }
-
-            function renderCustomTimeBlock(blockData) {
-                const block = document.createElement('div');
-                block.classList.add('time-block');
-                block.style.backgroundColor = blockData.color;
-                const [startPercentage, endPercentage] = calculateTimeBlockPercentages(blockData.startTime, blockData.endTime);
-                if (startPercentage !== null && endPercentage !== null) {
-                    block.style.left = `${startPercentage}%`;
-                    block.style.width = `${endPercentage - startPercentage}%`;
-                    block.draggable = true; // 使其可拖动
-                    block.dataset.id = blockData.id; // 存储 ID 以便识别
-                    timelineBar.appendChild(block);
-
-                    // 添加拖拽事件监听器
-                    block.addEventListener('dragstart', handleDragStart);
-                    block.addEventListener('dragend', handleDragEnd);
-                }
-            }
-
-            function calculateTimeBlockPercentages(startTimeStr, endTimeStr) {
-                const [startHour, startMinute] = startTimeStr.split(':').map(Number);
-                const [endHour, endMinute] = endTimeStr.split(':').map(Number);
-
-                const startTotalMinutes = startHour * 60 + startMinute;
-                const endTotalMinutes = endHour * 60 + endMinute;
-
-                let startPercentage = (startTotalMinutes / (24 * 60)) * 100;
-                let endPercentage = (endTotalMinutes / (24 * 60)) * 100;
-
-                if (endTotalMinutes <= startTotalMinutes) {
-                    endPercentage += 100; // 处理跨午夜的情况
-                }
-
-                return [startPercentage, endPercentage];
-            }
-
-            function loadSettings() {
-                const savedWakeUpTime = getCookie('wakeUpTime');
-                const savedSleepTime = getCookie('sleepTime');
-                const savedCustomTimeBlocks = getCookie('customTimeBlocks');
-
-                if (savedWakeUpTime) wakeUpTimeInput.value = savedWakeUpTime;
-                if (savedSleepTime) sleepTimeInput.value = savedSleepTime;
-                if (savedCustomTimeBlocks) {
-                    customTimeBlocks = JSON.parse(savedCustomTimeBlocks);
-                    renderCustomTimeBlockForms();
-                }
-
-                wakeUpTime = wakeUpTimeInput.value;
-                sleepTime = sleepTimeInput.value;
-                renderTimeBlocks();
-            }
-
-            function saveSettings() {
-                setCookie('wakeUpTime', wakeUpTimeInput.value, 30);
-                setCookie('sleepTime', sleepTimeInput.value, 30);
-                setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
-                renderTimeBlocks();
-            }
-
-            timeSettingsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                wakeUpTime = wakeUpTimeInput.value;
-                sleepTime = sleepTimeInput.value;
-                saveSettings();
+            const customTimeBlocks = JSON.parse(getCookie('customTimeBlocks') || '[]');
+            customTimeBlocks.forEach(blockData => {
+                renderCustomTimeBlock(blockData);
             });
+        }
 
-            addTimeBlockButton.addEventListener('click', () => {
-                const newBlock = {
-                    id: Date.now(),
-                    startTime: '09:00',
-                    endTime: '10:00',
-                    color: '#aaffaa'
-                };
-                customTimeBlocks.push(newBlock);
-                renderCustomTimeBlockForms();
-                saveSettings();
-            });
-
-            function renderCustomTimeBlockForms() {
-                timeBlocksContainer.innerHTML = '';
-                customTimeBlocks.forEach(block => {
-                    const form = document.createElement('div');
-                    form.classList.add('custom-time-block-form');
-                    form.innerHTML = `
-                        <input type="time" value="${block.startTime}" data-id="${block.id}" data-field="startTime">
-                        <input type="time" value="${block.endTime}" data-id="${block.id}" data-field="endTime">
-                        <input type="color" value="${block.color}" data-id="${block.id}" data-field="color">
-                        <button type="button" class="delete-time-block" data-id="${block.id}">删除</button>
-                    `;
-                    timeBlocksContainer.appendChild(form);
-                });
+        function renderSleepTimeBlock(wakeUpTime, sleepTime) {
+            const sleepBlock = document.createElement('div');
+            sleepBlock.classList.add('time-block', 'sleep-time');
+            const [startPercentage, endPercentage] = calculateTimeBlockPercentages(wakeUpTime, sleepTime);
+            if (startPercentage !== null && endPercentage !== null) {
+                sleepBlock.style.left = `${startPercentage}%`;
+                sleepBlock.style.width = `${endPercentage - startPercentage}%`;
+                timelineBar.appendChild(sleepBlock);
             }
+        }
 
-            timeBlocksContainer.addEventListener('change', (e) => {
-                if (e.target.matches('input[type="time"], input[type="color"]')) {
-                    const blockId = parseInt(e.target.dataset.id);
-                    const field = e.target.dataset.field;
-                    const value = e.target.value;
-                    const block = customTimeBlocks.find(b => b.id === blockId);
-                    if (block) {
-                        block[field] = value;
-                        saveSettings();
-                    }
-                }
-            });
-
-            timeBlocksContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('delete-time-block')) {
-                    const blockIdToDelete = parseInt(e.target.dataset.id);
-                    customTimeBlocks = customTimeBlocks.filter(block => block.id !== blockIdToDelete);
-                    renderCustomTimeBlockForms();
-                    saveSettings();
-                }
-            });
-
-            // --- 拖拽调整时间段 ---
-            let draggedBlock = null;
-            let dragStartOffset = 0;
-
-            function handleDragStart(event) {
-                draggedBlock = event.target;
-                dragStartOffset = event.clientX - draggedBlock.offsetLeft;
+        function renderCustomTimeBlock(blockData) {
+            const block = document.createElement('div');
+            block.classList.add('time-block');
+            block.style.backgroundColor = blockData.color;
+            const [startPercentage, endPercentage] = calculateTimeBlockPercentages(blockData.startTime, blockData.endTime);
+            if (startPercentage !== null && endPercentage !== null) {
+                block.style.left = `${startPercentage}%`;
+                block.style.width = `${endPercentage - startPercentage}%`;
+                block.draggable = true;
+                block.dataset.id = blockData.id;
+                timelineBar.appendChild(block);
+                block.addEventListener('dragstart', handleDragStart);
+                block.addEventListener('dragend', handleDragEnd);
             }
+        }
 
-            function handleDragEnd(event) {
+        // --- 拖拽调整时间段 ---
+        let draggedBlock = null;
+        let dragStartOffset = 0;
+
+        function handleDragStart(event) {
+            draggedBlock = event.target;
+            dragStartOffset = event.clientX - draggedBlock.offsetLeft;
+        }
+
+        function handleDragEnd(event) {
+            draggedBlock = null;
+        }
+
+        timelineBar.addEventListener('dragover', (event) => {
+            event.preventDefault();
+        });
+
+        timelineBar.addEventListener('drop', (event) => {
+            event.preventDefault();
+            if (draggedBlock) {
+                const timelineWidth = timelineBar.offsetWidth;
+                const newLeft = event.clientX - timelineBar.offsetLeft - dragStartOffset;
+                const startPercentage = Math.max(0, Math.min(100, (newLeft / timelineWidth) * 100));
+                const blockId = parseInt(draggedBlock.dataset.id);
+                const customTimeBlocks = JSON.parse(getCookie('customTimeBlocks') || '[]');
+                const blockData = customTimeBlocks.find(b => b.id === blockId);
+                if (blockData) {
+                    const durationPercentage = parseFloat(draggedBlock.style.width);
+                    const endPercentage = startPercentage + durationPercentage;
+                    const startTimeMinutes = Math.floor((startPercentage / 100) * 24 * 60);
+                    const endTimeMinutes = Math.floor((endPercentage / 100) * 24 * 60);
+                    const newStartHour = String(Math.floor(startTimeMinutes / 60)).padStart(2, '0');
+                    const newStartMinute = String(startTimeMinutes % 60).padStart(2, '0');
+                    const newEndHour = String(Math.floor(endTimeMinutes / 60) % 24).padStart(2, '0');
+                    const newEndMinute = String(endTimeMinutes % 60).padStart(2, '0');
+                    blockData.startTime = `${newStartHour}:${newStartMinute}`;
+                    blockData.endTime = `${newEndHour}:${newEndMinute}`;
+                    setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                    renderTimeBlocks();
+                }
                 draggedBlock = null;
             }
+        });
 
-            timelineBar.addEventListener('dragover', (event) => {
-                event.preventDefault();
+        // --- 设置部分 ---
+        const timeSettingsForm = document.getElementById('time-settings');
+        const wakeUpTimeInput = document.getElementById('wake-up-time');
+        const sleepTimeInput = document.getElementById('sleep-time');
+        const timeBlocksContainer = document.getElementById('time-blocks-container');
+        const addTimeBlockButton = document.getElementById('add-time-block');
+        const timerConfigsContainer = document.getElementById('timer-configs-container');
+        const addTimerConfigButton = document.getElementById('add-timer-config');
+
+        function loadSettings() {
+            wakeUpTimeInput.value = getCookie('wakeUpTime') || '07:00';
+            sleepTimeInput.value = getCookie('sleepTime') || '23:00';
+            renderCustomTimeBlockForms();
+            renderTimerConfigForms();
+        }
+
+        function saveSettings() {
+            setCookie('wakeUpTime', wakeUpTimeInput.value, 30);
+            setCookie('sleepTime', sleepTimeInput.value, 30);
+            renderTimeBlocks();
+        }
+
+        timeSettingsForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            saveSettings();
+        });
+
+        let customTimeBlocks = JSON.parse(getCookie('customTimeBlocks') || '[]');
+
+        function renderCustomTimeBlockForms() {
+            timeBlocksContainer.innerHTML = '';
+            customTimeBlocks.forEach(block => {
+                const form = document.createElement('div');
+                form.classList.add('custom-time-block-form');
+                form.innerHTML = `
+                    <input type="time" value="${block.startTime}" data-id="${block.id}" data-field="startTime">
+                    <input type="time" value="${block.endTime}" data-id="${block.id}" data-field="endTime">
+                    <input type="color" value="${block.color}" data-id="${block.id}" data-field="color">
+                    <button type="button" class="delete-time-block" data-id="${block.id}">删除</button>
+                `;
+                timeBlocksContainer.appendChild(form);
             });
+        }
 
-            timelineBar.addEventListener('drop', (event) => {
-                event.preventDefault();
-                if (draggedBlock) {
-                    const timelineWidth = timelineBar.offsetWidth;
-                    const newLeft = event.clientX - timelineBar.offsetLeft - dragStartOffset;
-                    const startPercentage = Math.max(0, Math.min(100, (newLeft / timelineWidth) * 100));
-
-                    const blockId = parseInt(draggedBlock.dataset.id);
-                    const blockData = customTimeBlocks.find(b => b.id === blockId);
-                    if (blockData) {
-                        const durationPercentage = parseFloat(draggedBlock.style.width);
-                        const endPercentage = startPercentage + durationPercentage;
-
-                        const startTimeMinutes = Math.floor((startPercentage / 100) * 24 * 60);
-                        const endTimeMinutes = Math.floor((endPercentage / 100) * 24 * 60);
-
-                        const newStartHour = String(Math.floor(startTimeMinutes / 60)).padStart(2, '0');
-                        const newStartMinute = String(startTimeMinutes % 60).padStart(2, '0');
-                        const newEndHour = String(Math.floor(endTimeMinutes / 60) % 24).padStart(2, '0');
-                        const newEndMinute = String(endTimeMinutes % 60).padStart(2, '0');
-
-                        blockData.startTime = `${newStartHour}:${newStartMinute}`;
-                        blockData.endTime = `${newEndHour}:${newEndMinute}`;
-                        renderCustomTimeBlockForms();
-                        saveSettings();
-                    }
-                    draggedBlock = null;
-                }
-            });
-
-            // --- 任务管理 ---
-            const newTaskInput = document.getElementById('new-task');
-            const addTaskButton = document.getElementById('add-task-button');
-            const taskList = document.getElementById('task-list');
-            const selectedTaskSelect = document.getElementById('selected-task');
-            let tasks = [];
-
-            function loadTasks() {
-                const savedTasks = getCookie('tasks');
-                if (savedTasks) {
-                    tasks = JSON.parse(savedTasks);
-                    renderTasks();
-                }
-            }
-
-            function saveTasks() {
-                setCookie('tasks', JSON.stringify(tasks), 30);
-                renderTasks();
-            }
-
-            function renderTasks() {
-                taskList.innerHTML = '';
-                selectedTaskSelect.innerHTML = '<option value="">-- 请选择任务 --</option>';
-                tasks.forEach(task => {
-                    const listItem = document.createElement('li');
-                    listItem.classList.add('task-item');
-                    listItem.innerHTML = `
-                        <span>${task.name}</span>
-                        <div>
-                            <button onclick="startTaskPomodoro(${task.id})">开始番茄</button>
-                            <button onclick="deleteTask(${task.id})">删除</button>
-                        </div>
-                    `;
-                    taskList.appendChild(listItem);
-
-                    const option = document.createElement('option');
-                    option.value = task.id;
-                    option.textContent = task.name;
-                    selectedTaskSelect.appendChild(option);
-                });
-            }
-
-            window.startTaskPomodoro = function(taskId) {
-                selectedTaskSelect.value = taskId;
-                resetTimer();
+        addTimeBlockButton.addEventListener('click', () => {
+            const newBlock = {
+                id: Date.now(),
+                startTime: '09:00',
+                endTime: '10:00',
+                color: '#aaffaa'
             };
+            customTimeBlocks.push(newBlock);
+            setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+            renderCustomTimeBlockForms();
+            renderTimeBlocks();
+        });
 
-            window.deleteTask = function(taskId) {
-                tasks = tasks.filter(task => task.id !== taskId);
-                saveTasks();
-            };
-
-            addTaskButton.addEventListener('click', () => {
-                const taskName = newTaskInput.value.trim();
-                if (taskName) {
-                    const newTask = { id: Date.now(), name: taskName, pomodorosCompleted: 0 };
-                    tasks.push(newTask);
-                    saveTasks();
-                    newTaskInput.value = '';
+        timeBlocksContainer.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="time"], input[type="color"]')) {
+                const blockId = parseInt(e.target.dataset.id);
+                const field = e.target.dataset.field;
+                const value = e.target.value;
+                const blockIndex = customTimeBlocks.findIndex(b => b.id === blockId);
+                if (blockIndex > -1) {
+                    customTimeBlocks[blockIndex][field] = value;
+                    setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                    renderTimeBlocks();
                 }
+            }
+        });
+
+        timeBlocksContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-time-block')) {
+                const blockIdToDelete = parseInt(e.target.dataset.id);
+                customTimeBlocks = customTimeBlocks.filter(block => block.id !== blockIdToDelete);
+                setCookie('customTimeBlocks', JSON.stringify(customTimeBlocks), 30);
+                renderCustomTimeBlockForms();
+                renderTimeBlocks();
+            }
+        });
+
+        let timerConfigs = JSON.parse(getCookie('timerConfigs') || '[]');
+
+        function renderTimerConfigForms() {
+            timerConfigsContainer.innerHTML = '';
+            timerConfigs.forEach(config => {
+                const form = document.createElement('div');
+                form.classList.add('timer-config-form');
+                form.innerHTML = `
+                    <input type="hidden" data-id="${config.id}">
+                    <div class="form-group">
+                        <label>名称</label>
+                        <input type="text" value="${config.name}" data-field="name">
+                    </div>
+                    <div class="form-group">
+                        <label>类型</label>
+                        <select data-field="type">
+                            <option value="timer" ${config.type === 'timer' ? 'selected' : ''}>定时器</option>
+                            <option value="pomodoro" ${config.type === 'pomodoro' ? 'selected' : ''}>番茄钟</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>时长 (分钟)</label>
+                        <input type="number" value="${config.duration || ''}" data-field="duration">
+                    </div>
+                    <div class="form-group" style="display: ${config.type === 'pomodoro' ? 'block' : 'none'};">
+                        <label>专注时长 (分钟)</label>
+                        <input type="number" value="${config.focusDuration || ''}" data-field="focusDuration">
+                    </div>
+                    <div class="form-group" style="display: ${config.type === 'pomodoro' ? 'block' : 'none'};">
+                        <label>休息时长 (分钟)</label>
+                        <input type="number" value="${config.breakDuration || ''}" data-field="breakDuration">
+                    </div>
+                    <button type="button" class="delete-timer-config" data-id="${config.id}">删除</button>
+                `;
+                timerConfigsContainer.appendChild(form);
             });
+        }
 
-            // --- 专注时间钟部分 ---
-            const focusDurationInput = document.getElementById('focus-duration');
-            const breakDurationInput = document.getElementById('break-duration');
-            const startStopButton = document.getElementById('start-stop-button');
-            const resetButton = document.getElementById('reset-button');
-            const timerText = document.querySelector('.timer-text');
-            const progressBar = document.querySelector('.progress');
-            const overtimeProgress = document.querySelector('.overtime-progress');
-            const progressBarContainer = document.querySelector('.progress-bar-container');
-            const pomodorosPerTaskInput = document.getElementById('pomodoros-per-task');
-            const completedPomodorosSpan = document.getElementById('completed-pomodoros');
-            const totalPomodorosSpan = document.getElementById('total-pomodoros');
+        addTimerConfigButton.addEventListener('click', () => {
+            const newConfig = {
+                id: Date.now(),
+                name: '新的专注模式',
+                type: 'timer',
+                duration: 25,
+                focusDuration: 25,
+                breakDuration: 5
+            };
+            timerConfigs.push(newConfig);
+            setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+            renderTimerConfigForms();
+        });
 
-            let focusTime = parseInt(focusDurationInput.value, 10) * 60;
-            let breakTime = parseInt(breakDurationInput.value, 10) * 60;
-            let timeLeft;
-            let isRunning = false;
+        timerConfigsContainer.addEventListener('change', (e) => {
+            const target = e.target;
+            if (target.matches('input, select')) {
+                const configForm = target.closest('.timer-config-form');
+                const configId = parseInt(configForm.querySelector('[data-id]').dataset.id);
+                const field = target.dataset.field;
+                const value = target.value;
+                const configIndex = timerConfigs.findIndex(c => c.id === configId);
+                if (configIndex > -1) {
+                    timerConfigs[configIndex][field] = value;
+                    setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+                }
+                if (field === 'type') {
+                    const isPomodoro = value === 'pomodoro';
+                    configForm.querySelectorAll('.form-group').forEach(group => {
+                        if (group.querySelector('input[data-field="focusDuration"]')) {
+                            group.style.display = isPomodoro ? 'flex' : 'none';
+                        }
+                    });
+                }
+            }
+        });
+
+        timerConfigsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('delete-timer-config')) {
+                const configIdToDelete = parseInt(e.target.dataset.id);
+                timerConfigs = timerConfigs.filter(config => config.id !== configIdToDelete);
+                setCookie('timerConfigs', JSON.stringify(timerConfigs), 30);
+                renderTimerConfigForms();
+            }
+        });
+
+        // --- 专注时间钟部分 ---
+        const startStopButton = document.getElementById('start-stop-button');
+        const resetButton = document.getElementById('reset-button');
+        const timerText = document.querySelector('.timer-text');
+        const progressBar = document.querySelector('.progress');
+        const overtimeProgress = document.querySelector('.overtime-progress');
+        const progressBarContainer = document.querySelector('.progress-bar-container');
+        const taskProgressDisplay = document.querySelector('.task-progress span');
+        const selectedTimerSelect = document.getElementById('selected-timer');
+        let timerInterval;
+        let isRunning = false;
+        let timeLeft = 0;
+        let currentTimerConfig = null;
+
+        function loadTimerConfigsForSelection() {
+            const timerConfigs = JSON.parse(getCookie('timerConfigs') || '[]');
+            selectedTimerSelect.innerHTML = '<option value="">-- 请选择 --</option>';
+            timerConfigs.forEach(config => {
+                const option = document.createElement('option');
+                option.value = config.id;
+                option.textContent = config.name;
+                selectedTimerSelect.appendChild(option);
+            });
+        }
+
+        function startTimer() {
+            if (!currentTimerConfig) return;
+            isRunning = true;
+            startStopButton.textContent = '停止';
+            const isPomodoro = currentTimerConfig.type === 'pomodoro';
+            let focusTime = isPomodoro ? currentTimerConfig.focusDuration * 60 : currentTimerConfig.duration * 60;
+            let breakTime = isPomodoro ? currentTimerConfig.breakDuration * 60 : 0;
             let isFocusing = true;
-            let timerInterval;
-            let currentTask = null;
-
-            function updateTimerDisplay() {
-                const minutes = Math.floor(Math.abs(timeLeft) / 60);
-                const seconds = Math.abs(timeLeft) % 60;
-                timerText.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-            }
-
-            function updateProgressBar() {
-                let percentage;
-                if (timeLeft >= 0) {
-                    percentage = (1 - timeLeft / (isFocusing ? focusTime : breakTime)) * 100;
-                    progressBar.style.width = `${percentage}%`;
-                    overtimeProgress.style.width = '0%';
-                } else {
-                    percentage = Math.abs(timeLeft) / (isFocusing ? focusTime : breakTime) * 100;
-                    progressBar.style.width = '100%';
-                    overtimeProgress.style.width = `${percentage}%`;
-                }
-            }
-
-            function startTimer() {
-                isRunning = true;
-                startStopButton.textContent = '停止';
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    updateTimerDisplay();
-                    updateProgressBar();
-
-                    if (timeLeft < 0) {
-                        progressBarContainer.style.backgroundColor = '#ffdddd'; // 超时背景色
-                    }
-
-                    if (timeLeft <= -5) { // 超时 5 秒后改变颜色
-                        overtimeProgress.style.backgroundColor = '#ff4d4d';
-                    }
-
-                    if (timeLeft < (isFocusing ? -focusTime : -breakTime)) {
-                        clearInterval(timerInterval);
-                        playNotificationSound();
-                        if (isFocusing) {
-                            if (currentTask) {
-                                currentTask.pomodorosCompleted = (currentTask.pomodorosCompleted || 0) + 1;
-                                saveTasks();
-                                updateTaskProgressDisplay();
-                            }
-                        }
-                        isFocusing = !isFocusing;
-                        timeLeft = isFocusing ? focusTime : breakTime;
-                        progressBarContainer.style.backgroundColor = '#ddd'; // 恢复正常背景色
-                        overtimeProgress.style.backgroundColor = '#ff4d4d'; // 恢复超时颜色
-                        if (selectedTaskSelect.value) {
-                             startTimer();
-                        } else {
-                            stopTimer();
-                        }
-                    }
-                }, 1000);
-            }
-
-            function stopTimer() {
-                isRunning = false;
-                startStopButton.textContent = '开始';
-                clearInterval(timerInterval);
-            }
-
-            function resetTimer() {
-                stopTimer();
-                isFocusing = true;
-                timeLeft = focusTime;
+            timeLeft = focusTime;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
                 updateTimerDisplay();
-                updateProgressBar();
-                progressBarContainer.style.backgroundColor = '#ddd';
-                overtimeProgress.style.width = '0%';
-                updateTaskProgressDisplay();
+                updateProgressBar(focusTime);
+                if (timeLeft < 0) {
+                    clearInterval(timerInterval);
+                    playNotificationSound();
+                    isRunning = false;
+                    startStopButton.textContent = '开始';
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            isRunning = false;
+            startStopButton.textContent = '开始';
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timeLeft = currentTimerConfig ? (currentTimerConfig.type === 'pomodoro' ? currentTimerConfig.focusDuration * 60 : currentTimerConfig.duration * 60) : 0;
+            updateTimerDisplay();
+            updateProgressBar(currentTimerConfig ? (currentTimerConfig.type === 'pomodoro' ? currentTimerConfig.focusDuration * 60 : currentTimerConfig.duration * 60) : 1);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(Math.abs(timeLeft) / 60);
+            const seconds = Math.abs(timeLeft) % 60;
+            timerText.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function updateProgressBar(totalTime) {
+            const percentage = totalTime > 0 ? (1 - timeLeft / totalTime) * 100 : 0;
+            progressBar.style.width = `${percentage}%`;
+            overtimeProgress.style.width = timeLeft < 0 ? `${Math.abs(timeLeft) / totalTime * 100}%` : '0%';
+        }
+
+        startStopButton.addEventListener('click', () => {
+            if (isRunning) {
+                stopTimer();
+            } else {
+                startTimer();
             }
+        });
 
-            function updateTaskProgressDisplay() {
-                const selectedTaskId = parseInt(selectedTaskSelect.value);
-                currentTask = tasks.find(task => task.id === selectedTaskId);
-                const totalPomodoros = parseInt(pomodorosPerTaskInput.value, 10);
-                totalPomodorosSpan.textContent = totalPomodoros;
-                if (currentTask) {
-                    completedPomodorosSpan.textContent = currentTask.pomodorosCompleted || 0;
-                } else {
-                    completedPomodorosSpan.textContent = '0';
-                }
-            }
+        resetButton.addEventListener('click', resetTimer);
 
-            startStopButton.addEventListener('click', () => {
-                const selectedTaskId = parseInt(selectedTaskSelect.value);
-                if (selectedTaskId && !isRunning) {
-                    currentTask = tasks.find(task => task.id === selectedTaskId);
-                    startTimer();
-                } else {
-                    stopTimer();
-                }
-            });
-
-            resetButton.addEventListener('click', resetTimer);
-
-            focusDurationInput.addEventListener('change', () => {
-                focusTime = parseInt(focusDurationInput.value, 10) * 60;
-                if (!isRunning) {
-                    resetTimer();
-                }
-            });
-
-            breakDurationInput.addEventListener('change', () => {
-                breakTime = parseInt(breakDurationInput.value, 10) * 60;
-                if (!isRunning) {
-                    resetTimer();
-                }
-            });
-
-            pomodorosPerTaskInput.addEventListener('change', updateTaskProgressDisplay);
-
-            selectedTaskSelect.addEventListener('change', () => {
-                resetTimer();
-                updateTaskProgressDisplay();
-            });
-
-            // 初始化
-            loadSettings();
-            loadTasks();
-            updateTimeline();
-            setInterval(updateTimeline, 60000); // 每分钟更新时间轴
+        selectedTimerSelect.addEventListener('change', () => {
+            const selectedId = selectedTimerSelect.value;
+            const timerConfigs = JSON.parse(getCookie('timerConfigs') || '[]');
+            currentTimerConfig = timerConfigs.find(config => config.id === selectedId);
             resetTimer();
+        });
+
+        // --- 任务管理 ---
+        const taskList = document.getElementById('task-list');
+        const newTaskInput = document.getElementById('new-task');
+        const addTaskButton = document.getElementById('add-task-button');
+
+        function loadTasks() {
+            const tasks = JSON.parse(getCookie('tasks') || '[]');
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('task-item');
+                listItem.innerHTML = `
+                    <span>${task.name}</span>
+                    <button onclick="deleteTask(${task.id})">删除</button>
+                `;
+                taskList.appendChild(listItem);
+            });
+        }
+
+        function saveTasks() {
+            const tasks = JSON.parse(getCookie('tasks') || '[]');
+            setCookie('tasks', JSON.stringify(tasks), 30);
+            loadTasks();
+        }
+
+        window.deleteTask = function(taskId) {
+            let tasks = JSON.parse(getCookie('tasks') || '[]');
+            tasks = tasks.filter(task => task.id !== taskId);
+            setCookie('tasks', JSON.stringify(tasks), 30);
+            loadTasks();
+        };
+
+        addTaskButton.addEventListener('click', () => {
+            const taskName = newTaskInput.value.trim();
+            if (taskName) {
+                let tasks = JSON.parse(getCookie('tasks') || '[]');
+                const newTask = { id: Date.now(), name: taskName };
+                tasks.push(newTask);
+                saveTasks();
+                newTaskInput.value = '';
+            }
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateTimeline();
+            setInterval(updateTimeline, 60000);
+            loadSettings();
+            loadTimerConfigsForSelection();
+            loadTasks();
         });
     </script>
 </body>
