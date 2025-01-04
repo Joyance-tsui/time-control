@@ -42,6 +42,15 @@
             font-weight: bold;
         }
 
+        #sleep-time-display {
+            opacity: 0.5;
+            font-size: 1.2em;
+            margin-left: 10px;
+            transition: opacity 0.3s ease, font-size 0.3s ease;
+            white-space: nowrap; /* 防止换行 */
+        }
+
+
         #day-progress-container {
             flex-grow: 1;
             height: 10px;
@@ -69,22 +78,8 @@
             background-color: #888;
             pointer-events: auto;
             cursor: grab;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
         }
 
-         #sleep-time-display {
-            position: absolute;
-            top: -25px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-size: 0.8em;
-            white-space: nowrap;
-           margin-left: 5px; /* 新增：设置左边距 */
-        }
 
         #sleep-time-indicator:active {
             cursor: grabbing;
@@ -191,9 +186,8 @@
             margin-bottom: 15px;
             cursor: pointer;
         }
-
         #focus-settings-summary.locked {
-            cursor: not-allowed;
+             cursor: not-allowed;
         }
 
         .setting-label {
@@ -327,10 +321,10 @@
     <div class="container">
         <div id="top-time-bar">
             <div id="current-time"></div>
-            <div id="day-progress-container">
+           <div id="sleep-time-display"></div>
+             <div id="day-progress-container">
                 <div id="day-progress"></div>
                 <div id="sleep-time-indicator">
-                    <div id="sleep-time-display"></div>
                 </div>
                 <div id="schedule-container"></div>
                 <div id="sleep-time-settings" class="hidden">
@@ -372,6 +366,11 @@
                     <input type="range" id="break-multiplier-slider" min="0.1" max="5" value="1" step="0.1" class="duration-slider">
                     <input type="number" id="break-multiplier" min="0.1" max="5" value="1" step="0.1">
                 </div>
+                 <div class="duration-control">
+                    <label for="transition-multiplier-slider">过渡倍率:</label>
+                    <input type="range" id="transition-multiplier-slider" min="1" max="10" value="5" step="1" class="duration-slider">
+                    <input type="number" id="transition-multiplier" min="1" max="10" value="5" step="1">
+                </div>
             </div>
             <div id="timer-display">00:00</div>
             <div id="progress-bar-container">
@@ -389,10 +388,10 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const currentTimeElement = document.getElementById('current-time');
+            const sleepTimeDisplay = document.getElementById('sleep-time-display');
             const dayProgressContainer = document.getElementById('day-progress-container');
             const dayProgress = document.getElementById('day-progress');
             const sleepTimeIndicator = document.getElementById('sleep-time-indicator');
-            const sleepTimeDisplay = document.getElementById('sleep-time-display');
             const scheduleContainer = document.getElementById('schedule-container');
             const timerDisplay = document.getElementById('timer-display');
             const progressBar = document.getElementById('progress-bar');
@@ -420,6 +419,10 @@
             const breakDurationSlider = document.getElementById('break-duration-slider');
             const breakMultiplierInput = document.getElementById('break-multiplier');
             const breakMultiplierSlider = document.getElementById('break-multiplier-slider');
+              const transitionMultiplierInput = document.getElementById('transition-multiplier');
+              const transitionMultiplierSlider = document.getElementById('transition-multiplier-slider');
+
+
 
             let now;
             let schedule = [];
@@ -443,18 +446,33 @@
             let totalBreakTime;
             let baseBreakDuration;
             let breakTimeMultiplier = parseFloat(localStorage.getItem('breakTimeMultiplier')) || 1;
+             let transitionMultiplier = parseInt(localStorage.getItem('transitionMultiplier')) || 5;
             let settingsLocked = false;
+
 
             function updateCurrentTime() {
                 now = new Date();
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 currentTimeElement.textContent = `${hours}:${minutes}`;
+
+                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                 const sleepTimeMinutes = timeToMinutes(latestSleepTime);
+                  let timeDiff = Math.abs(currentMinutes - sleepTimeMinutes);
+                  timeDiff = Math.min(timeDiff, 120) / 120;
+
+
+                 let opacityValue = 1-timeDiff;
+                 let fontSize = 1.2 + (1- timeDiff) * 0.4;
+                sleepTimeDisplay.style.opacity = opacityValue;
+                sleepTimeDisplay.style.fontSize = `${fontSize}em`;
+
+
                 updateDayProgress();
                 highlightCurrentSchedule();
             }
 
-            function updateDayProgress() {
+             function updateDayProgress() {
                 const minutesInDay = 24 * 60;
                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
                 const progress = (currentMinutes / minutesInDay) * 100;
@@ -463,15 +481,15 @@
                 updateSleepTimeIndicator();
             }
 
+
+
            function updateSleepTimeIndicator() {
                 const minutesInDay = 24 * 60;
                 const sleepTimeMinutes = timeToMinutes(latestSleepTime);
                 const sleepPosition = (sleepTimeMinutes / minutesInDay) * dayProgressContainer.offsetWidth;
                 sleepTimeIndicator.style.left = `${sleepPosition}px`;
-                 sleepTimeDisplay.textContent = latestSleepTime;
-               
-            }
 
+            }
 
             function renderSchedule() {
                 scheduleContainer.innerHTML = '';
@@ -541,10 +559,11 @@
                 updateTimerDisplay();
                 focusInterval = setInterval(updateTimerDisplay, 100);
                 updateProgressBar();
+                 focusSettingsSummary.classList.add('locked');
+                 settingsLocked = true;
+                 focusSettingsSummary.style.cursor = 'not-allowed';
                 focusSettingsSummary.style.display = 'flex';
                 focusSettingsDetailed.style.display = 'none';
-                focusSettingsSummary.classList.add('locked');
-                settingsLocked = true;
             }
 
             function stopTimer() {
@@ -556,8 +575,9 @@
                 startStopButton.textContent = '开始';
                 startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
-                 focusSettingsSummary.classList.remove('locked');
-                settingsLocked = false;
+                focusSettingsSummary.classList.remove('locked');
+                focusSettingsSummary.style.cursor = 'pointer';
+                  settingsLocked = false;
                 updateProgressBar();
             }
 
@@ -621,16 +641,16 @@
                 if (isFocusing) {
                     const elapsedMilliseconds = Date.now() - focusStartTime;
                     let progress;
-                    if (!isOvertime) {
+                     if (!isOvertime) {
                         progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
-                        progressBar.classList.remove('overtime');
+                         progressBar.classList.remove('overtime');
                         progressBar.style.justifyContent = 'flex-start';
                         progressBar.style.width = `${progress}%`;
                     } else {
-                        const overtimeProgress = Math.min(1, (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000)) * 100;
-                        progressBar.classList.add('overtime');
-                        progressBar.style.justifyContent = 'flex-end';
-                        progressBar.style.width = `${overtimeProgress}%`;
+                         const overtimeProgress = Math.min(1, (elapsedMilliseconds - totalFocusTime * 1000) / (totalFocusTime * 1000)) * 100;
+                         progressBar.classList.add('overtime');
+                         progressBar.style.justifyContent = 'flex-end';
+                         progressBar.style.width = `${overtimeProgress}%`;
                     }
                 } else if (!isFocusing && remainingBreakTime > 0) {
                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
@@ -641,7 +661,7 @@
                 } else {
                     progressBar.style.width = '0%';
                     progressBar.classList.remove('overtime');
-                    progressBar.style.justifyContent = 'flex-start';
+                     progressBar.style.justifyContent = 'flex-start';
                 }
             }
 
@@ -671,7 +691,7 @@
                 } else if (isOvertime) {
                     const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
                     const overtimeRatio = overtimeMilliseconds / (totalFocusTime * 1000);
-                    breakDuration = baseBreakDuration * (1 + overtimeRatio * breakTimeMultiplier);
+                     breakDuration = baseBreakDuration * (1 + overtimeRatio * breakTimeMultiplier);
                 }
 
                 totalBreakTime = breakDuration;
@@ -705,7 +725,7 @@
                 sleepTimeInput.value = latestSleepTime;
             }
 
-            dayProgressContainer.addEventListener('click', () => {
+              dayProgressContainer.addEventListener('click', () => {
                if(!settingsLocked){
                 sleepTimeSettings.classList.toggle('hidden');
                  if (!sleepTimeSettings.classList.contains('hidden')) {
@@ -713,6 +733,7 @@
                 }
                }
             });
+
 
             sleepTimeIndicator.addEventListener('mousedown', (e) => {
                 isDraggingSleepTime = true;
@@ -784,7 +805,7 @@
             });
 
             // ----- 专注时间设置 -----
-           focusSettingsSummary.addEventListener('click', () => {
+          focusSettingsSummary.addEventListener('click', () => {
                 if (!settingsLocked) {
                     focusSettingsSummary.style.display = 'none';
                     focusSettingsDetailed.style.display = 'flex';
@@ -812,8 +833,7 @@
                 breakDurationDisplay.textContent = breakDurationInput.value;
             });
 
-
-            breakMultiplierSlider.addEventListener('input', () => {
+             breakMultiplierSlider.addEventListener('input', () => {
                 breakMultiplierInput.value = breakMultiplierSlider.value;
                 breakTimeMultiplier = parseFloat(breakMultiplierSlider.value);
                localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
@@ -835,9 +855,33 @@
 
               });
 
+                transitionMultiplierSlider.addEventListener('input', () => {
+                transitionMultiplierInput.value = transitionMultiplierSlider.value;
+                transitionMultiplier = parseInt(transitionMultiplierSlider.value);
+               localStorage.setItem('transitionMultiplier', transitionMultiplier);
+            });
+
+             transitionMultiplierInput.addEventListener('change', () => {
+                  let value = parseInt(transitionMultiplierInput.value);
+                    if (value < 1) {
+                        value = 1;
+                        transitionMultiplierInput.value = 1;
+                    }
+                    if (value > 10) {
+                        value = 10;
+                        transitionMultiplierInput.value = 10;
+                    }
+                    transitionMultiplierSlider.value = value;
+                     transitionMultiplier = value;
+                     localStorage.setItem('transitionMultiplier', transitionMultiplier);
+
+            });
+
+
+             transitionMultiplierInput.value = transitionMultiplier;
+            transitionMultiplierSlider.value = transitionMultiplier;
            breakMultiplierInput.value = breakTimeMultiplier;
             breakMultiplierSlider.value = breakTimeMultiplier;
-           
             // 初始渲染
             renderSchedule();
             updateCurrentTime();
