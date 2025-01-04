@@ -40,14 +40,16 @@
         #current-time {
             font-size: 1.8em;
             font-weight: bold;
+            display: flex;
+            align-items: baseline;
         }
 
         #sleep-time-display {
             opacity: 0.5;
-            font-size: 1.2em;
-            margin-left: 10px;
-            transition: opacity 0.3s ease, font-size 0.3s ease;
-            white-space: nowrap; /* 防止换行 */
+            font-size: 0.8em;
+            color: #999;
+            margin-left: 5px;
+            white-space: nowrap;
         }
 
         #day-progress-container {
@@ -183,9 +185,13 @@
             gap: 20px;
             margin-bottom: 15px;
             cursor: pointer;
+            user-select: none;
         }
+
         #focus-settings-summary.locked {
-             cursor: not-allowed;
+            cursor: not-allowed;
+            pointer-events: none;
+            opacity: 0.7;
         }
 
         .setting-label {
@@ -210,6 +216,10 @@
             flex-grow: 1;
         }
 
+        .duration-control input[type="number"] {
+            width: 50px;
+        }
+
         #timer-display {
             text-align: center;
             font-size: 3em;
@@ -219,7 +229,7 @@
 
         #progress-bar-container {
              background-color: #ccc;
-             border-radius: 10px;
+             border-radius: 12.5px;
             height: 25px;
              margin-bottom: 20px;
             overflow: hidden;
@@ -228,11 +238,11 @@
         }
 
         #progress-bar {
-            background-color: #888;
+            background-color: #666;
              height: 100%;
              width: 0%;
-            transition: width 0.1s ease-out, right 0.1s ease-out, background-color 0.3s ease-in-out;
-            border-radius: 10px;
+            transition: width 0.3s ease-out, right 0.3s ease-out, background-color 0.3s ease-in-out;
+            border-radius: 12.5px;
             display: flex;
              align-items: center;
             justify-content: flex-start;
@@ -324,8 +334,9 @@
 <body>
     <div class="container">
         <div id="top-time-bar">
-            <div id="current-time"></div>
-             <div id="sleep-time-display"></div>
+            <div id="current-time">
+                <span></span><div id="sleep-time-display"></div>
+            </div>
             <div id="day-progress-container">
                 <div id="day-progress"></div>
                 <div id="sleep-time-indicator">
@@ -403,7 +414,7 @@
 
      <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const currentTimeElement = document.getElementById('current-time');
+            const currentTimeElement = document.querySelector('#current-time > span');
             const sleepTimeDisplay = document.getElementById('sleep-time-display');
             const dayProgressContainer = document.getElementById('day-progress-container');
             const dayProgress = document.getElementById('day-progress');
@@ -474,16 +485,12 @@
                 const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
                 currentTimeElement.textContent = `${hours}:${minutes}`;
+                sleepTimeDisplay.textContent = latestSleepTime;
 
                  const currentMinutes = now.getHours() * 60 + now.getMinutes();
                  const sleepTimeMinutes = timeToMinutes(latestSleepTime);
                   let timeDiff = Math.abs(currentMinutes - sleepTimeMinutes);
                   timeDiff = Math.min(timeDiff, 120) / 120;
-
-                 let opacityValue = 1-timeDiff;
-                 let fontSize = 1.2 + (1- timeDiff) * 0.4;
-                sleepTimeDisplay.style.opacity = opacityValue;
-                sleepTimeDisplay.style.fontSize = `${fontSize}em`;
 
                 updateDayProgress();
                 highlightCurrentSchedule();
@@ -498,14 +505,11 @@
                 updateSleepTimeIndicator();
             }
 
-
-
            function updateSleepTimeIndicator() {
                 const minutesInDay = 24 * 60;
                 const sleepTimeMinutes = timeToMinutes(latestSleepTime);
                 const sleepPosition = (sleepTimeMinutes / minutesInDay) * dayProgressContainer.offsetWidth;
                 sleepTimeIndicator.style.left = `${sleepPosition}px`;
-
             }
 
             function renderSchedule() {
@@ -578,9 +582,6 @@
                 updateProgressBar();
                  focusSettingsSummary.classList.add('locked');
                  settingsLocked = true;
-                 focusSettingsSummary.style.cursor = 'not-allowed';
-                focusSettingsSummary.style.display = 'flex';
-                focusSettingsDetailed.style.display = 'none';
             }
 
             function stopTimer() {
@@ -593,7 +594,6 @@
                 startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
                 focusSettingsSummary.classList.remove('locked');
-                focusSettingsSummary.style.cursor = 'pointer';
                   settingsLocked = false;
                 updateProgressBar();
             }
@@ -704,6 +704,8 @@
                 clearInterval(focusInterval);
                 isFocusing = false;
                 isPaused = false;
+                focusSettingsSummary.classList.remove('locked');
+                settingsLocked = false;
 
                 let breakDuration = baseBreakDuration;
                  let overtimeMinutes = 0;
@@ -715,8 +717,6 @@
 
                     breakDuration = baseBreakDuration * (quadraticA * overtimeMinutes * overtimeMinutes + quadraticB * overtimeMinutes + quadraticC);
                   }
-
-
 
                 totalBreakTime = breakDuration;
                 remainingBreakTime = breakDuration;
@@ -738,6 +738,8 @@
                     remainingBreakTime = 0;
                     timerDisplay.textContent = '00:00';
                     progressBar.style.width = '0%';
+                    focusSettingsSummary.classList.remove('locked');
+                    settingsLocked = false;
                 }
             });
 
@@ -756,6 +758,13 @@
                     displaySleepTime();
                 }
                }
+            });
+
+            focusSettingsSummary.addEventListener('click', () => {
+                if (!settingsLocked) {
+                    focusSettingsSummary.style.display = 'none';
+                    focusSettingsDetailed.style.display = 'flex';
+                }
             });
 
             sleepTimeIndicator.addEventListener('mousedown', (e) => {
@@ -785,7 +794,7 @@
                 latestSleepTime = minutesToTime(newSleepMinutes);
                 localStorage.setItem('sleepTime', latestSleepTime);
                 updateDayProgress();
-                renderSchedule();
+                                renderSchedule();
                 sleepTimeTooltip.textContent = latestSleepTime;
                 displaySleepTime();
             }
@@ -820,8 +829,7 @@
                     localStorage.setItem('sleepTime', latestSleepTime);
                     updateDayProgress();
                     renderSchedule();
-                    updateSleepTime();                  
-                    Indicator();
+                    updateSleepTimeIndicator();
                 }
             }
 
@@ -830,12 +838,6 @@
             });
 
             // ----- 专注时间设置 -----
-          focusSettingsSummary.addEventListener('click', () => {
-                if (!settingsLocked) {
-                    focusSettingsSummary.style.display = 'none';
-                    focusSettingsDetailed.style.display = 'flex';
-                }
-            });
 
             focusDurationSlider.addEventListener('input', () => {
                 focusDurationInput.value = focusDurationSlider.value;
@@ -927,7 +929,7 @@
             // 初始渲染
             renderSchedule();
             updateCurrentTime();
-            setInterval(updateCurrentTime, 60000);
+            setInterval(updateCurrentTime, 1000);
             updateDayProgress();
              displaySleepTime();
             focusDurationDisplay.textContent = focusDurationInput.value;
