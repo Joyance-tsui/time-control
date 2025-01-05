@@ -205,13 +205,17 @@
            width: 5vh;
         }
        #info-bar {
-            background-color: rgba(200, 200, 200, 0.2);
-            text-align: center;
+           background-color: rgba(200, 200, 200, 0.2);
+           text-align: center;
              padding: 1vh;
             margin-bottom: 1.5vh;
             border-radius: 0.5vh;
-       }
-       #timer-display {
+             display: none;
+        }
+        #info-bar.active {
+            display: block;
+        }
+         #timer-display {
            text-align: center;
             font-size: 4vw;
            font-weight: bold;
@@ -258,8 +262,8 @@
             transition: background-color 0.3s ease;
              margin-bottom: 1vh;
              white-space: nowrap;
-       }
-       #start-stop-button.running {
+        }
+        #start-stop-button.running {
             background-color: #555;
         }
        .controls-container {
@@ -273,9 +277,9 @@
              cursor: pointer;
            font-size: 1.1vw;
             white-space: nowrap;
-           color: #333;
+            color: #333;
         }
-        #pause-button {
+       #pause-button {
             background-color: #bbb;
             color: #333;
        }
@@ -290,20 +294,20 @@
          #clear-button:hover {
            color: white;
             background-color: #ccc;
-       }
+        }
          .time-node-draggable {
             position: absolute;
            top: 0;
             left: 0;
              cursor: grab;
-           z-index: 10;
+            z-index: 10;
            display: flex;
             white-space: nowrap;
             padding: 0 0.5vw;
         }
         .time-node-draggable:active {
            cursor: grabbing;
-       }
+        }
          #schedule-section {
             width: 100%;
              max-height: 60vh;
@@ -312,23 +316,23 @@
              background-color: rgba(200, 200, 200, 0.1);
             border-radius: 0.5vh;
            padding: 1vh;
-       }
-         #schedule-section h3 {
-             font-size: 1.3vw;
+        }
+        #schedule-section h3 {
+           font-size: 1.3vw;
            margin-bottom: 0.5vh;
             display: flex;
-             align-items: center;
-            justify-content: space-between;
-       }
-         .time-node-item {
+            align-items: center;
+             justify-content: space-between;
+        }
+        .time-node-item {
            padding: 0.5vh 1vh;
-            margin-bottom: 0.5vh;
+           margin-bottom: 0.5vh;
             border-bottom: 1px solid #eee;
-             font-size: 1vw;
-           display: flex;
+            font-size: 1vw;
+             display: flex;
              align-items: center;
            justify-content: space-between;
-             position: relative;
+            position: relative;
             cursor: pointer;
         }
        .time-node-item:hover .time-node-time{
@@ -340,36 +344,36 @@
              transition: background-color 0.3s ease;
         }
         .time-node-item.editing .time-node-time {
-           background-color: #bbb;
-        }
-         .time-node-item .time-node-detail {
-            display: flex;
+            background-color: #bbb;
+       }
+        .time-node-item .time-node-detail {
+           display: flex;
             flex-direction: column;
             padding-right: 2vw;
         }
-        .time-node-item .reminder-time {
+       .time-node-item .reminder-time {
            font-size: 0.8vw;
             color: #777;
-       }
-        #add-time-node-drawer {
+        }
+       #add-time-node-drawer {
             position: absolute;
              top: 0;
             left: 0;
             right: 0;
             bottom: 0;
              padding: 2vw;
-             background-color: rgba(255, 255, 255, 0.95);
-            z-index: 100;
+            background-color: rgba(255, 255, 255, 0.95);
+           z-index: 100;
            display: flex;
             flex-direction: column;
              align-items: center;
-            box-sizing: border-box;
-             display: none;
-        }
-       #add-time-node-drawer.active {
+           box-sizing: border-box;
+            display: none;
+       }
+        #add-time-node-drawer.active {
              display: flex;
         }
-         #add-time-node-drawer > h3 {
+        #add-time-node-drawer > h3 {
              font-size: 1.8vw;
         }
          #add-time-node-drawer label {
@@ -378,52 +382,52 @@
             display: block;
         }
         #add-time-node-drawer input[type="text"], #add-time-node-drawer input[type="number"]{
-           padding: 0.5vw;
-           border: 1px solid #ccc;
+              padding: 0.5vw;
+              border: 1px solid #ccc;
             width: 100%;
             box-sizing: border-box;
-        }
+         }
         #add-time-node-drawer button {
              padding: 1vh 2vh;
             border: none;
            border-radius: 0.5vh;
-             cursor: pointer;
-           font-size: 1.1vw;
-           white-space: nowrap;
+            cursor: pointer;
+            font-size: 1.1vw;
+            white-space: nowrap;
             color: #333;
              margin-top: 1.5vw;
        }
         #add-time-node-drawer button:hover {
              background-color: #ddd;
-            color: #333;
+             color: #333;
        }
-       #add-time-node-drawer #drawer-close-button {
+         #add-time-node-drawer #drawer-close-button {
             position: absolute;
             top: 1vw;
-           right: 1vw;
-            font-size: 2vw;
+            right: 1vw;
+             font-size: 2vw;
             cursor: pointer;
          }
         #reset-settings-button {
-             margin-top: 1vw;
-           background-color: #ddd;
+            margin-top: 1vw;
+            background-color: #ddd;
              color: #333;
             padding: 1vh 2vh;
-           border: none;
+            border: none;
             border-radius: 0.5vh;
-            cursor: pointer;
-           font-size: 1vw;
-            white-space: nowrap;
+           cursor: pointer;
+            font-size: 1vw;
+             white-space: nowrap;
         }
-         #reset-settings-button:hover {
-            background-color: #ccc;
+        #reset-settings-button:hover {
+             background-color: #ccc;
         }
        .hidden {
            display: none !important;
         }
         #schedule-date-display {
             font-size: 1vw;
-            color: #777;
+             color: #777;
             white-space: nowrap;
         }
     </style>
@@ -433,7 +437,7 @@
         <div class="left-panel">
             <div id="top-time-bar">
                 <div id="current-time">
-                    <span></span><div id="sleep-time-display"></div>
+                   <span></span><div id="sleep-time-display"></div>
                  </div>
             </div>
              <div id="info-bar"></div>
@@ -456,11 +460,11 @@
                     <button id="sleep-time-confirm">确定</button>
                </div>
             </div>
-            <div id="focus-timer">
-               <div id="focus-settings-summary">
-                    <div class="setting-label">专注时长: <span id="focus-duration-display">25</span> 分钟</div>
-                    <div class="setting-label">休息时长: <span id="break-duration-display">5</span> 分钟</div>
-               </div>
+           <div id="focus-timer">
+                 <div id="focus-settings-summary">
+                     <div class="setting-label">专注时长: <span id="focus-duration-display">25</span> 分钟</div>
+                     <div class="setting-label">休息时长: <span id="break-duration-display">5</span> 分钟</div>
+                </div>
                  <div id="focus-settings-detailed">
                    <div class="duration-control">
                         <label for="focus-duration-slider">专注时长:</label>
@@ -481,10 +485,10 @@
                        <label for="transition-multiplier-slider">过渡倍率:</label>
                         <input type="range" id="transition-multiplier-slider" min="1" max="10" value="5" step="1" class="duration-slider">
                         <input type="number" id="transition-multiplier" min="1" max="10" value="5" step="1">
-                   </div>
+                    </div>
                      <div class="duration-control">
                        <label for="quadratic-a">系数a:</label>
-                        <input type="number" id="quadratic-a"  value="0.01" step="0.01">
+                         <input type="number" id="quadratic-a"  value="0.01" step="0.01">
                     </div>
                      <div class="duration-control">
                        <label for="quadratic-b">系数b:</label>
@@ -499,11 +503,11 @@
                  <div id="timer-display">00:00</div>
                <div id="progress-bar-container">
                     <div id="progress-bar"></div>
-                </div>
-                <button id="start-stop-button">开始/折叠</button>
-                <div class="controls-container hidden">
-                   <button id="pause-button">暂停</button>
-                    <button id="clear-button">清空</button>
+                 </div>
+                 <button id="start-stop-button">开始/折叠</button>
+                 <div class="controls-container hidden">
+                    <button id="pause-button">暂停</button>
+                     <button id="clear-button">清空</button>
                    <button id="break-button">休息</button>
                  </div>
            </div>
@@ -529,13 +533,13 @@
       <script>
           document.addEventListener('DOMContentLoaded', () => {
               const currentTimeElement = document.querySelector('#current-time > span');
-           const sleepTimeDisplay = document.getElementById('sleep-time-display');
+            const sleepTimeDisplay = document.getElementById('sleep-time-display');
             const dayProgressContainer = document.getElementById('day-progress-container');
              const dayProgress = document.getElementById('day-progress');
             const scheduleContainer = document.getElementById('schedule-container');
              const timerDisplay = document.getElementById('timer-display');
-           const progressBar = document.getElementById('progress-bar');
-             const startStopButton = document.getElementById('start-stop-button');
+             const progressBar = document.getElementById('progress-bar');
+           const startStopButton = document.getElementById('start-stop-button');
             const pauseButton = document.getElementById('pause-button');
             const clearButton = document.getElementById('clear-button');
             const controlsContainer = document.querySelector('.controls-container');
@@ -572,87 +576,99 @@
             const resetSettingsButton = document.getElementById('reset-settings-button');
             const breakButton = document.getElementById('break-button');
               const scheduleDateDisplay = document.getElementById('schedule-date-display');
-                let now;
-            let timeNodes = JSON.parse(Cookies.get('timeNodes') || '[]');
-            let isDraggingSleepTime = false;
-            let dragStartX;
+               let now;
+             let isDraggingSleepTime = false;
+             let dragStartX;
             let dragStartSleepMinutes;
             let isSettingNewNode = false;
-            let newNodeTime = '';
-              let isDraggingNode = false;
+             let newNodeTime = '';
+             let isDraggingNode = false;
             let draggedNodeElement;
             let dragNodeStartX;
             let dragNodeStartY;
-             let draggedNodeOriginalLeft;
-            let draggedNodeOriginalTop;
-           let editingNode = null;
-           let focusInterval;
+            let draggedNodeOriginalLeft;
+              let draggedNodeOriginalTop;
+            let editingNode = null;
+            let focusInterval;
             let remainingTime;
-            let isFocusing = false;
+             let isFocusing = false;
              let isPaused = false;
              let totalFocusTime;
              let focusStartTime;
-             let pauseStartTime;
-             let isOvertime = false;
-            let breakInterval;
+           let pauseStartTime;
+            let isOvertime = false;
+             let breakInterval;
            let remainingBreakTime;
-            let breakStartTime;
-            let totalBreakTime;
-            let baseBreakDuration;
+             let breakStartTime;
+           let totalBreakTime;
+             let baseBreakDuration;
             let breakTimeMultiplier = parseFloat(localStorage.getItem('breakTimeMultiplier')) || 1;
              let transitionMultiplier = parseInt(localStorage.getItem('transitionMultiplier')) || 5;
              let quadraticA = parseFloat(localStorage.getItem('quadraticA')) || 0.01;
             let quadraticB = parseFloat(localStorage.getItem('quadraticB')) || 0.1;
             let quadraticC = parseFloat(localStorage.getItem('quadraticC')) || 1;
             let settingsLocked = false;
-            let displayedDate = new Date();
-            function updateCurrentTime() {
-                 now = new Date();
-                const hours = String(now.getHours()).padStart(2, '0');
+           let displayedDate = new Date();
+           let timeNodes = getStoredTimeNodes();
+
+        function updateCurrentTime() {
+                now = new Date();
+               const hours = String(now.getHours()).padStart(2, '0');
                 const minutes = String(now.getMinutes()).padStart(2, '0');
-                 currentTimeElement.textContent = `${hours}:${minutes}`;
-                 updateNodeDisplay();
-                const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                let minTimeDiff = Infinity;
+                currentTimeElement.textContent = `${hours}:${minutes}`;
+                updateNodeDisplay();
+                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
+               let minTimeDiff = Infinity;
                 let closestNode = null;
                  timeNodes.forEach(node => {
-                   const nodeTimeMinutes = timeToMinutes(node.time);
-                     let timeDiff = (nodeTimeMinutes - currentMinutes);
-                  if (timeDiff > 0 && timeDiff < minTimeDiff) {
-                        minTimeDiff = timeDiff;
-                       closestNode = node;
-                   }
+                    const nodeDate = new Date(now);
+                      const [nodeHours, nodeMinutes] = node.time.split(':');
+                     nodeDate.setHours(parseInt(nodeHours));
+                     nodeDate.setMinutes(parseInt(nodeMinutes));
+                       nodeDate.setSeconds(0);
+                   const nodeDateOnly = new Date(nodeDate.getFullYear(), nodeDate.getMonth(), nodeDate.getDate());
+                    const displayedDateOnly = new Date(displayedDate.getFullYear(), displayedDate.getMonth(), displayedDate.getDate());
+                     if (nodeDateOnly.getTime() === displayedDateOnly.getTime()){
+                         const nodeTimeMinutes = timeToMinutes(node.time);
+                        let timeDiff = (nodeTimeMinutes - currentMinutes);
+                       if (timeDiff > 0 && timeDiff < minTimeDiff) {
+                           minTimeDiff = timeDiff;
+                            closestNode = node;
+                        }
+                    }
                });
-                if (closestNode && minTimeDiff <= parseInt(closestNode.reminder)) {
+                 if (closestNode && minTimeDiff <= parseInt(closestNode.reminder)) {
                     infoBar.textContent = `${closestNode.name} 即将到达`;
+                   infoBar.classList.add('active');
                 }else {
                     infoBar.textContent = '';
-               }
-            }
-            function updateDayProgress() {
+                     infoBar.classList.remove('active');
+                }
+           }
+           function updateDayProgress() {
                 const minutesInDay = 24 * 60;
-                 const currentMinutes = now.getHours() * 60 + now.getMinutes();
-                const progress = (currentMinutes / minutesInDay) * 100;
-                 dayProgress.style.width = `${progress}%`;
+                const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                 const progress = (currentMinutes / minutesInDay) * 100;
+                dayProgress.style.width = `${progress}%`;
                 updateNodePositions();
-            }
+           }
            function updateNodePositions() {
-                const minutesInDay = 24 * 60;
-                const containerWidth = dayProgressContainer.offsetWidth;
-               timeNodes.forEach((node, index) => {
+                 const minutesInDay = 24 * 60;
+               const containerWidth = dayProgressContainer.offsetWidth;
+                 timeNodes.forEach((node, index) => {
                     const nodeTimeMinutes = timeToMinutes(node.time);
-                   const nodePosition = (nodeTimeMinutes / minutesInDay) * containerWidth;
+                    const nodePosition = (nodeTimeMinutes / minutesInDay) * containerWidth;
                     const nodeElement = document.querySelector(`.time-node-draggable[data-index='${index}']`);
                    if (nodeElement) {
-                       nodeElement.style.left = `${nodePosition}px`;
-                  }
-                });
+                        nodeElement.style.left = `${nodePosition}px`;
+                   }
+               });
             }
-           function renderSchedule() {
+          function renderSchedule() {
                 const year = displayedDate.getFullYear();
-                 const month = String(displayedDate.getMonth() + 1).padStart(2, '0');
-                 const day = String(displayedDate.getDate()).padStart(2, '0');
-                 scheduleDateDisplay.textContent = `${year}-${month}-${day}`;
+               const month = String(displayedDate.getMonth() + 1).padStart(2, '0');
+               const day = String(displayedDate.getDate()).padStart(2, '0');
+                scheduleDateDisplay.textContent = `${year}-${month}-${day}`;
                 scheduleSection.innerHTML = `<h3>日历  <button id="add-time-node-button">+</button></h3>`;
                 const addTimeNodeButton = document.getElementById('add-time-node-button');
                  addTimeNodeButton.addEventListener('click', () => {
@@ -663,438 +679,467 @@
                });
                timeNodes.forEach((node, index) => {
                    const nodeDate = new Date(now);
-                   const [nodeHours, nodeMinutes] = node.time.split(':');
+                    const [nodeHours, nodeMinutes] = node.time.split(':');
                     nodeDate.setHours(parseInt(nodeHours));
-                    nodeDate.setMinutes(parseInt(nodeMinutes));
-                    nodeDate.setSeconds(0);
-                   const nodeDateOnly = new Date(nodeDate.getFullYear(), nodeDate.getMonth(), nodeDate.getDate());
+                   nodeDate.setMinutes(parseInt(nodeMinutes));
+                     nodeDate.setSeconds(0);
+                     const nodeDateOnly = new Date(nodeDate.getFullYear(), nodeDate.getMonth(), nodeDate.getDate());
                     const displayedDateOnly = new Date(displayedDate.getFullYear(), displayedDate.getMonth(), displayedDate.getDate());
                      if (nodeDateOnly.getTime() === displayedDateOnly.getTime()) {
                         const nodeItem = document.createElement('div');
-                         nodeItem.classList.add('time-node-item');
-                       nodeItem.dataset.index = index;
-                         nodeItem.innerHTML = `
+                        nodeItem.classList.add('time-node-item');
+                        nodeItem.dataset.index = index;
+                        nodeItem.innerHTML = `
                              <div class="time-node-detail">
                                  <div>${node.name}</div>
-                                 <div class="reminder-time">提醒时间: ${node.reminder} 分钟</div>
+                                  <div class="reminder-time">提醒时间: ${node.reminder} 分钟</div>
                              </div>
                              <span class="time-node-time">${node.time}</span>
-                        `;
-                         nodeItem.addEventListener('click', (e) => {
-                             if (e.target.classList.contains('time-node-time') && editingNode != index) {
-                                 editTimeNode(index, nodeItem);
-                            } else if (editingNode == index) {
-                                 stopEditTimeNode(nodeItem)
-                            }
-                        });
-                         scheduleSection.appendChild(nodeItem);
-                     }
-                });
-           }
-           function editTimeNode(index, nodeItem) {
-                editingNode = index;
-               nodeItem.classList.add('editing');
-                const timeNodeTime = nodeItem.querySelector('.time-node-time');
-                const oldTime = timeNodeTime.textContent;
-               timeNodeTime.contentEditable = true;
-                 timeNodeTime.focus();
-                 timeNodeTime.addEventListener('blur', stopEditTimeNode);
-             }
-            function stopEditTimeNode(nodeItem) {
-                if (editingNode != null){
-                    nodeItem.classList.remove('editing');
-                   const timeNodeTime = nodeItem.querySelector('.time-node-time');
-                  const newTime = timeNodeTime.textContent;
-                   if (newTime) {
-                        timeNodes[editingNode].time = newTime;
-                        Cookies.set('timeNodes', JSON.stringify(timeNodes), { expires: 365 });
-                            updateNodePositions();
-                            renderSchedule();
-                        }
-                     timeNodeTime.contentEditable = false;
-                     timeNodeTime.removeEventListener('blur', stopEditTimeNode);
-                   editingNode = null;
-               }
-            }
-           function updateNodeDisplay() {
-               const minutesInDay = 24 * 60;
-                const containerWidth = dayProgressContainer.offsetWidth;
-                const sleepTimeDisplay = document.getElementById('sleep-time-display');
-                let nodeDisplay = '';
-                 timeNodes.forEach((node, index) => {
-                   const nodeTimeMinutes = timeToMinutes(node.time);
-                    const timeDiff = Math.abs( (now.getHours() * 60 + now.getMinutes()) - nodeTimeMinutes);
-                  if (timeDiff < 120) {
-                        const timeDiffRatio = Math.min(timeDiff, 120) / 120;
-                        const opacity =  1 - timeDiffRatio;
-                        nodeDisplay += `
-                            <span style="font-size: 0.8vw; opacity: ${opacity}; margin-left: 0.3vw; white-space: nowrap;">${node.time}</span>
                          `;
+                        nodeItem.addEventListener('click', (e) => {
+                            if (e.target.classList.contains('time-node-time') && editingNode != index) {
+                                editTimeNode(index, nodeItem);
+                            } else if (editingNode == index) {
+                                stopEditTimeNode(nodeItem)
+                            }
+                       });
+                       scheduleSection.appendChild(nodeItem);
                     }
                });
+          }
+          function editTimeNode(index, nodeItem) {
+              editingNode = index;
+               nodeItem.classList.add('editing');
+                 const timeNodeTime = nodeItem.querySelector('.time-node-time');
+                const oldTime = timeNodeTime.textContent;
+                timeNodeTime.contentEditable = true;
+                timeNodeTime.focus();
+                 timeNodeTime.addEventListener('blur', stopEditTimeNode);
+           }
+          function stopEditTimeNode(nodeItem) {
+                if (editingNode != null){
+                     nodeItem.classList.remove('editing');
+                    const timeNodeTime = nodeItem.querySelector('.time-node-time');
+                   const newTime = timeNodeTime.textContent;
+                   if (newTime) {
+                       timeNodes[editingNode].time = newTime;
+                      storeTimeNodes();
+                            updateNodePositions();
+                            renderSchedule();
+                      }
+                     timeNodeTime.contentEditable = false;
+                   timeNodeTime.removeEventListener('blur', stopEditTimeNode);
+                    editingNode = null;
+                }
+          }
+         function updateNodeDisplay() {
+                const minutesInDay = 24 * 60;
+                 const containerWidth = dayProgressContainer.offsetWidth;
+                const sleepTimeDisplay = document.getElementById('sleep-time-display');
+                 let nodeDisplay = '';
+                timeNodes.forEach((node, index) => {
+                  const nodeDate = new Date(now);
+                    const [nodeHours, nodeMinutes] = node.time.split(':');
+                    nodeDate.setHours(parseInt(nodeHours));
+                     nodeDate.setMinutes(parseInt(nodeMinutes));
+                     nodeDate.setSeconds(0);
+                    const nodeDateOnly = new Date(nodeDate.getFullYear(), nodeDate.getMonth(), nodeDate.getDate());
+                    const displayedDateOnly = new Date(displayedDate.getFullYear(), displayedDate.getMonth(), displayedDate.getDate());
+                    if (nodeDateOnly.getTime() === displayedDateOnly.getTime()){
+                        const nodeTimeMinutes = timeToMinutes(node.time);
+                        const timeDiff = Math.abs( (now.getHours() * 60 + now.getMinutes()) - nodeTimeMinutes);
+                         if (timeDiff < 120) {
+                           const timeDiffRatio = Math.min(timeDiff, 120) / 120;
+                            const opacity =  1 - timeDiffRatio;
+                           nodeDisplay += `
+                                <span style="font-size: 0.8vw; opacity: ${opacity}; margin-left: 0.3vw; white-space: nowrap;">${node.time}</span>
+                            `;
+                        }
+                   }
+                });
                  sleepTimeDisplay.innerHTML = nodeDisplay;
             }
-             function renderTimeNodes() {
+            function renderTimeNodes() {
                 const minutesInDay = 24 * 60;
-               const containerWidth = dayProgressContainer.offsetWidth;
+                 const containerWidth = dayProgressContainer.offsetWidth;
                  scheduleContainer.innerHTML = '';
-               timeNodes.forEach((node, index) => {
-                     const startTimeMinutes = timeToMinutes(node.time);
-                     const startPosition = (startTimeMinutes / minutesInDay) * containerWidth;
+                timeNodes.forEach((node, index) => {
+                      const startTimeMinutes = timeToMinutes(node.time);
+                    const startPosition = (startTimeMinutes / minutesInDay) * containerWidth;
                      const timeNode = document.createElement('div');
                         timeNode.classList.add('time-node-draggable');
-                        timeNode.dataset.index = index;
-                      timeNode.textContent = node.time;
-                      timeNode.style.left = `${startPosition}px`;
-                      scheduleContainer.appendChild(timeNode);
-                    timeNode.addEventListener('mousedown', (e) => {
-                       isDraggingNode = true;
-                        draggedNodeElement = e.target;
-                         dragNodeStartX = e.clientX;
-                        dragNodeStartY = e.clientY;
-                        draggedNodeOriginalLeft = parseFloat(window.getComputedStyle(draggedNodeElement).left);
-                        draggedNodeOriginalTop = parseFloat(window.getComputedStyle(draggedNodeElement).top);
-                      document.addEventListener('mousemove', dragNode);
-                         document.addEventListener('mouseup', stopDragNode);
-                        e.preventDefault();
-                    });
-                     timeNode.addEventListener('mouseenter', (e) => {
-                        const time = timeNodes[index].time;
-                         timeNode.textContent = `${time} ${timeNodes[index].name}`;
-                     });
+                         timeNode.dataset.index = index;
+                        timeNode.textContent = node.time;
+                     timeNode.style.left = `${startPosition}px`;
+                     scheduleContainer.appendChild(timeNode);
+                      timeNode.addEventListener('mousedown', (e) => {
+                            isDraggingNode = true;
+                            draggedNodeElement = e.target;
+                            dragNodeStartX = e.clientX;
+                             dragNodeStartY = e.clientY;
+                           draggedNodeOriginalLeft = parseFloat(window.getComputedStyle(draggedNodeElement).left);
+                            draggedNodeOriginalTop = parseFloat(window.getComputedStyle(draggedNodeElement).top);
+                            document.addEventListener('mousemove', dragNode);
+                           document.addEventListener('mouseup', stopDragNode);
+                            e.preventDefault();
+                        });
+                       timeNode.addEventListener('mouseenter', (e) => {
+                           const time = timeNodes[index].time;
+                            timeNode.textContent = `${time} ${timeNodes[index].name}`;
+                       });
                      timeNode.addEventListener('mouseleave', (e) => {
-                       timeNode.textContent = timeNodes[index].time;
-                   });
-                });
-           }
-           function dragNode(e) {
+                           timeNode.textContent = timeNodes[index].time;
+                       });
+                 });
+            }
+            function dragNode(e) {
                 if (!isDraggingNode) return;
-                const rect = dayProgressContainer.getBoundingClientRect();
-                 const deltaX = e.clientX - dragNodeStartX;
-               const newLeft = draggedNodeOriginalLeft + deltaX;
-                 let percentage = newLeft / rect.width;
-                let newSleepMinutes =  Math.round(percentage * 24 * 60);
-                if (newSleepMinutes < 0) newSleepMinutes = 0;
-                if (newSleepMinutes >= 24 * 60) newSleepMinutes = 24 * 60 -1;
+                 const rect = dayProgressContainer.getBoundingClientRect();
+                  const deltaX = e.clientX - dragNodeStartX;
+                   const newLeft = draggedNodeOriginalLeft + deltaX;
+                  let percentage = newLeft / rect.width;
+                   let newSleepMinutes =  Math.round(percentage * 24 * 60);
+                    if (newSleepMinutes < 0) newSleepMinutes = 0;
+                     if (newSleepMinutes >= 24 * 60) newSleepMinutes = 24 * 60 -1;
                   newNodeTime = minutesToTime(newSleepMinutes);
                   draggedNodeElement.style.left = `${newLeft}px`;
-                  draggedNodeElement.textContent = `${newNodeTime} ${timeNodes[draggedNodeElement.dataset.index].name}`;
-                  updateNodePositions();
+                   draggedNodeElement.textContent = `${newNodeTime} ${timeNodes[draggedNodeElement.dataset.index].name}`;
+                 updateNodePositions();
             }
-            function stopDragNode() {
-                 if (!isDraggingNode) return;
-                 isDraggingNode = false;
+             function stopDragNode() {
+                if (!isDraggingNode) return;
+                isDraggingNode = false;
                  if (newNodeTime) {
-                      timeNodes[draggedNodeElement.dataset.index].time = newNodeTime;
-                      Cookies.set('timeNodes', JSON.stringify(timeNodes), { expires: 365 });
-                      draggedNodeElement.textContent = newNodeTime;
-                      updateNodeDisplay();
+                     timeNodes[draggedNodeElement.dataset.index].time = newNodeTime;
+                     storeTimeNodes();
+                   draggedNodeElement.textContent = newNodeTime;
+                     updateNodeDisplay();
                      renderSchedule();
                  }
                 newNodeTime = '';
-                document.removeEventListener('mousemove', dragNode);
-                 document.removeEventListener('mouseup', stopDragNode);
+               document.removeEventListener('mousemove', dragNode);
+                document.removeEventListener('mouseup', stopDragNode);
             }
              function timeToMinutes(timeString) {
-                const [hours, minutes] = timeString.split(':').map(Number);
-                return hours * 60 + minutes;
-            }
+               const [hours, minutes] = timeString.split(':').map(Number);
+               return hours * 60 + minutes;
+             }
             function minutesToTime(totalMinutes) {
                 const hours = String(Math.floor(totalMinutes / 60)).padStart(2, '0');
-                const minutes = String(totalMinutes % 60).padStart(2, '0');
-                return `${hours}:${minutes}`;
+                 const minutes = String(totalMinutes % 60).padStart(2, '0');
+                 return `${hours}:${minutes}`;
             }
-             function startFocusTimer() {
-                isFocusing = true;
-                isPaused = false;
-               isOvertime = false;
-                baseBreakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000;
-                const focusTime = parseInt(focusDurationInput.value, 10) * 60;
-               totalFocusTime = focusTime;
+           function startFocusTimer() {
+                 isFocusing = true;
+                 isPaused = false;
+                isOvertime = false;
+                 baseBreakDuration = parseInt(breakDurationInput.value, 10) * 60 * 1000;
+                 const focusTime = parseInt(focusDurationInput.value, 10) * 60;
+                totalFocusTime = focusTime;
                 remainingTime = focusTime;
-                focusStartTime = Date.now();
-                 startStopButton.textContent = '停止';
+                 focusStartTime = Date.now();
+                startStopButton.textContent = '停止';
                 startStopButton.classList.add('running');
                 controlsContainer.classList.remove('hidden');
                  focusSettingsDetailed.style.display = 'none';
                  updateTimerDisplay();
                 focusInterval = setInterval(updateTimerDisplay, 100);
-               updateProgressBar();
-                 focusSettingsSummary.classList.add('locked');
-                 settingsLocked = true;
+                 updateProgressBar();
+                focusSettingsSummary.classList.add('locked');
+                settingsLocked = true;
            }
             function stopTimer() {
                  clearInterval(focusInterval);
                 clearInterval(breakInterval);
-                 isFocusing = false;
-                 isPaused = false;
-                 isOvertime = false;
+                isFocusing = false;
+                isPaused = false;
+                isOvertime = false;
                  startStopButton.textContent = '开始/折叠';
-                 startStopButton.classList.remove('running');
+                startStopButton.classList.remove('running');
                 controlsContainer.classList.add('hidden');
                  focusSettingsSummary.classList.remove('locked');
                 settingsLocked = false;
-                 updateProgressBar();
+                updateProgressBar();
            }
-            function pauseTimer() {
+           function pauseTimer() {
                 if (isFocusing && !isPaused) {
-                   clearInterval(focusInterval);
+                     clearInterval(focusInterval);
                     clearInterval(breakInterval);
                     isPaused = true;
-                   pauseButton.textContent = '继续';
-                  pauseStartTime = Date.now();
-                } else if (isFocusing && isPaused) {
-                    isPaused = false;
-                     pauseButton.textContent = '暂停';
+                    pauseButton.textContent = '继续';
+                    pauseStartTime = Date.now();
+               } else if (isFocusing && isPaused) {
+                   isPaused = false;
+                    pauseButton.textContent = '暂停';
                    focusStartTime = focusStartTime + (Date.now() - pauseStartTime);
-                    focusInterval = setInterval(updateTimerDisplay, 100);
+                   focusInterval = setInterval(updateTimerDisplay, 100);
                 } else if (!isFocusing && remainingBreakTime > 0 && isPaused) {
                     isPaused = false;
                     breakStartTime = breakStartTime + (Date.now() - pauseStartTime);
-                   breakInterval = setInterval(updateTimerDisplay, 100);
+                    breakInterval = setInterval(updateTimerDisplay, 100);
                 }
             }
-           function resetTimer() {
-                stopTimer();
-               remainingTime = parseInt(focusDurationInput.value, 10) * 60;
+            function resetTimer() {
+                 stopTimer();
+                remainingTime = parseInt(focusDurationInput.value, 10) * 60;
                 updateTimerDisplay();
-               updateProgressBar();
-            }
+                 updateProgressBar();
+           }
            function updateTimerDisplay() {
-               if (isFocusing && !isPaused) {
-                   const elapsedMilliseconds = Date.now() - focusStartTime;
+                 if (isFocusing && !isPaused) {
+                    const elapsedMilliseconds = Date.now() - focusStartTime;
                     remainingTime = totalFocusTime - Math.floor(elapsedMilliseconds / 1000);
-                   if (remainingTime <= 0) {
-                        isOvertime = true;
+                     if (remainingTime <= 0) {
+                       isOvertime = true;
                    }
-                   let displaySeconds = Math.abs(remainingTime);
+                    let displaySeconds = Math.abs(remainingTime);
                    const minutes = String(Math.floor(displaySeconds / 60)).padStart(2, '0');
-                   const seconds = String(displaySeconds % 60).padStart(2, '0');
-                  timerDisplay.textContent = isOvertime ? `-${minutes}:${seconds}` : `${minutes}:${seconds}`;
-                    updateProgressBar();
-                } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
-                   const elapsedBreakMilliseconds = Date.now() - breakStartTime;
-                     const displayedBreakSeconds = Math.ceil(remainingBreakTime / 1000 - elapsedBreakMilliseconds / 1000);
+                  const seconds = String(displaySeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = isOvertime ? `-${minutes}:${seconds}` : `${minutes}:${seconds}`;
+                   updateProgressBar();
+                 } else if (!isFocusing && remainingBreakTime > 0 && !isPaused) {
+                     const elapsedBreakMilliseconds = Date.now() - breakStartTime;
+                   const displayedBreakSeconds = Math.ceil(remainingBreakTime / 1000 - elapsedBreakMilliseconds / 1000);
                     if (displayedBreakSeconds <= 0) {
                         clearInterval(breakInterval);
                         timerDisplay.textContent = '00:00';
-                       progressBar.style.width = '0%';
+                         progressBar.style.width = '0%';
                          return;
-                    }
-                     const minutes = String(Math.floor(displayedBreakSeconds / 60)).padStart(2, '0');
-                    const seconds = String(displayedBreakSeconds % 60).padStart(2, '0');
-                  timerDisplay.textContent = `${minutes}:${seconds}`;
-                  updateProgressBar();
+                   }
+                   const minutes = String(Math.floor(displayedBreakSeconds / 60)).padStart(2, '0');
+                   const seconds = String(displayedBreakSeconds % 60).padStart(2, '0');
+                    timerDisplay.textContent = `${minutes}:${seconds}`;
+                     updateProgressBar();
                }
-           }
+            }
             function updateProgressBar() {
                 if (isFocusing) {
                    const elapsedMilliseconds = Date.now() - focusStartTime;
-                   let progress;
-                   if (!isOvertime) {
-                         progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
+                     let progress;
+                    if (!isOvertime) {
+                        progress = Math.min(1, elapsedMilliseconds / (totalFocusTime * 1000)) * 100;
                        progressBar.classList.remove('overtime');
-                       progressBar.style.justifyContent = 'flex-start';
-                         progressBar.style.width = `${progress}%`;
-                    } else {
+                        progressBar.style.justifyContent = 'flex-start';
+                        progressBar.style.width = `${progress}%`;
+                     } else {
                         const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
                         const overtimeRatio = overtimeMilliseconds / (totalFocusTime * 1000);
-                        const easedOvertimeProgress = overtimeRatio / (overtimeRatio + 1) * 100;
+                       const easedOvertimeProgress = overtimeRatio / (overtimeRatio + 1) * 100;
                        progressBar.classList.add('overtime');
-                        progressBar.style.justifyContent = 'flex-end';
+                       progressBar.style.justifyContent = 'flex-end';
                         progressBar.style.width = `${easedOvertimeProgress}%`;
-                   }
+                    }
                 }  else if (!isFocusing && remainingBreakTime > 0) {
-                   const elapsedBreakMilliseconds = Date.now() - breakStartTime;
-                     const progress = Math.min(1, elapsedBreakMilliseconds / totalBreakTime) * 100;
-                    progressBar.classList.remove('overtime');
-                   progressBar.style.justifyContent = 'flex-start';
+                    const elapsedBreakMilliseconds = Date.now() - breakStartTime;
+                    const progress = Math.min(1, elapsedBreakMilliseconds / totalBreakTime) * 100;
+                      progressBar.classList.remove('overtime');
+                    progressBar.style.justifyContent = 'flex-start';
                      progressBar.style.width = `${progress}%`;
-                } else {
+                 } else {
                     progressBar.style.width = '0%';
-                     progressBar.classList.remove('overtime');
+                      progressBar.classList.remove('overtime');
                      progressBar.style.justifyContent = 'flex-start';
                 }
-           }
-            startStopButton.addEventListener('click', () => {
-               if (isFocusing) {
-                    stopTimer();
+            }
+             startStopButton.addEventListener('click', () => {
+                if (isFocusing) {
+                     stopTimer();
                  } else {
                     startFocusTimer();
                }
             });
-           pauseButton.addEventListener('click', () => {
-                pauseTimer();
+            pauseButton.addEventListener('click', () => {
+                 pauseTimer();
             });
-           clearButton.addEventListener('click', () => {
+             clearButton.addEventListener('click', () => {
                 resetTimer();
-            });
+             });
             function startBreakTimer(earlyBreak = false) {
                clearInterval(focusInterval);
                  isFocusing = false;
-                 isPaused = false;
+                isPaused = false;
                 focusSettingsSummary.classList.remove('locked');
                  settingsLocked = false;
-                let breakDuration = baseBreakDuration;
-                 let overtimeMinutes = 0;
-                if (earlyBreak && remainingTime > 0) {
+                 let breakDuration = baseBreakDuration;
+                let overtimeMinutes = 0;
+               if (earlyBreak && remainingTime > 0) {
                     breakDuration = Math.max(0, baseBreakDuration - (totalFocusTime - remainingTime) * 1000);
                 } else if (isOvertime) {
                     const overtimeMilliseconds = Date.now() - (focusStartTime + totalFocusTime * 1000);
-                      overtimeMinutes = Math.ceil(overtimeMilliseconds / (60 * 1000));
-                    breakDuration = baseBreakDuration * (quadraticA * overtimeMinutes * overtimeMinutes + quadraticB * overtimeMinutes + quadraticC);
-                 }
+                     overtimeMinutes = Math.ceil(overtimeMilliseconds / (60 * 1000));
+                   breakDuration = baseBreakDuration * (quadraticA * overtimeMinutes * overtimeMinutes + quadraticB * overtimeMinutes + quadraticC);
+                }
                 totalBreakTime = breakDuration;
-                remainingBreakTime = breakDuration;
-                 breakStartTime = Date.now();
+               remainingBreakTime = breakDuration;
+               breakStartTime = Date.now();
                 startStopButton.textContent = '开始/折叠';
                 startStopButton.classList.remove('running');
-                controlsContainer.classList.add('hidden');
-                 updateTimerDisplay();
-                updateProgressBar();
+                 controlsContainer.classList.add('hidden');
+               updateTimerDisplay();
+               updateProgressBar();
                 breakInterval = setInterval(updateTimerDisplay, 100);
            }
             breakButton.addEventListener('click', () => {
-                if (isFocusing) {
-                   startBreakTimer(true);
+                 if (isFocusing) {
+                    startBreakTimer(true);
                 } else if (remainingBreakTime > 0) {
-                    clearInterval(breakInterval);
+                   clearInterval(breakInterval);
                     remainingBreakTime = 0;
-                     timerDisplay.textContent = '00:00';
+                    timerDisplay.textContent = '00:00';
                     progressBar.style.width = '0%';
-                    focusSettingsSummary.classList.remove('locked');
-                    settingsLocked = false;
+                     focusSettingsSummary.classList.remove('locked');
+                   settingsLocked = false;
                 }
-           });
-            // ----- 睡眠时间设置 -----
-             function displaySleepTime() {
-                 if (timeNodes.length > 0) {
-                   const [hours, minutes] = timeNodes[0].time.split(':');
+            });
+           // ----- 睡眠时间设置 -----
+            function displaySleepTime() {
+                if (timeNodes.length > 0) {
+                     const [hours, minutes] = timeNodes[0].time.split(':');
                     sleepHoursInput.value = parseInt(hours);
-                    sleepMinutesInput.value = parseInt(minutes);
+                     sleepMinutesInput.value = parseInt(minutes);
                      sleepTimeInput.value = timeNodes[0].time;
                 }
             }
              dayProgressContainer.addEventListener('click', () => {
-                if(!settingsLocked){
-                   sleepTimeSettings.classList.toggle('hidden');
-                     if (!sleepTimeSettings.classList.contains('hidden')) {
-                       displaySleepTime();
-                    }
-               }
-            });
-            sleepTimeConfirmButton.addEventListener('click', () => {
+               if(!settingsLocked){
+                    sleepTimeSettings.classList.toggle('hidden');
+                    if (!sleepTimeSettings.classList.contains('hidden')) {
+                        displaySleepTime();
+                   }
+                }
+           });
+           sleepTimeConfirmButton.addEventListener('click', () => {
                 sleepTimeSettings.classList.add('hidden');
-            });
-           focusSettingsSummary.addEventListener('click', () => {
-                if (!settingsLocked) {
+           });
+            focusSettingsSummary.addEventListener('click', () => {
+                 if (!settingsLocked) {
                    focusSettingsDetailed.style.display = focusSettingsDetailed.style.display === 'none' ? 'flex' : 'none';
-               }
-           });
-             // ----- 专注时间设置 -----
-            focusDurationSlider.addEventListener('input', () => {
-                focusDurationInput.value = focusDurationSlider.value;
-                focusDurationDisplay.textContent = focusDurationSlider.value;
+                }
             });
-           focusDurationInput.addEventListener('change', () => {
-                focusDurationSlider.value = focusDurationInput.value;
-                focusDurationDisplay.textContent = focusDurationInput.value;
+             // ----- 专注时间设置 -----
+           focusDurationSlider.addEventListener('input', () => {
+                 focusDurationInput.value = focusDurationSlider.value;
+                 focusDurationDisplay.textContent = focusDurationSlider.value;
            });
-            breakDurationSlider.addEventListener('input', () => {
-               breakDurationInput.value = breakDurationSlider.value;
+           focusDurationInput.addEventListener('change', () => {
+                 focusDurationSlider.value = focusDurationInput.value;
+                focusDurationDisplay.textContent = focusDurationInput.value;
+            });
+             breakDurationSlider.addEventListener('input', () => {
+                 breakDurationInput.value = breakDurationSlider.value;
                 breakDurationDisplay.textContent = breakDurationSlider.value;
             });
-             breakDurationInput.addEventListener('change', () => {
-                breakDurationSlider.value = breakDurationInput.value;
+           breakDurationInput.addEventListener('change', () => {
+                 breakDurationSlider.value = breakDurationInput.value;
                  breakDurationDisplay.textContent = breakDurationInput.value;
             });
-            breakMultiplierSlider.addEventListener('input', () => {
-                 breakMultiplierInput.value = breakMultiplierSlider.value;
-               breakTimeMultiplier = parseFloat(breakMultiplierSlider.value);
-                 localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
+             breakMultiplierSlider.addEventListener('input', () => {
+                breakMultiplierInput.value = breakMultiplierSlider.value;
+                 breakTimeMultiplier = parseFloat(breakMultiplierSlider.value);
+               localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
             });
              breakMultiplierInput.addEventListener('change', () => {
-                    let value = parseFloat(breakMultiplierInput.value);
+                   let value = parseFloat(breakMultiplierInput.value);
                     if (value < 0.1) {
                        value = 0.1;
-                       breakMultiplierInput.value = 0.1;
+                         breakMultiplierInput.value = 0.1;
                    }
                      if (value > 5) {
-                       value = 5;
-                        breakMultiplierInput.value = 5;
+                         value = 5;
+                       breakMultiplierInput.value = 5;
                     }
-                  breakMultiplierSlider.value = value;
-                    breakTimeMultiplier = value;
-                    localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
-           });
-            transitionMultiplierSlider.addEventListener('input', () => {
+                    breakMultiplierSlider.value = value;
+                   breakTimeMultiplier = value;
+                     localStorage.setItem('breakTimeMultiplier', breakTimeMultiplier);
+             });
+           transitionMultiplierSlider.addEventListener('input', () => {
                 transitionMultiplierInput.value = transitionMultiplierSlider.value;
                transitionMultiplier = parseInt(transitionMultiplierSlider.value);
-                localStorage.setItem('transitionMultiplier', transitionMultiplier);
-           });
-            transitionMultiplierInput.addEventListener('change', () => {
-                   let value = parseInt(transitionMultiplierInput.value);
+                 localStorage.setItem('transitionMultiplier', transitionMultiplier);
+            });
+             transitionMultiplierInput.addEventListener('change', () => {
+                  let value = parseInt(transitionMultiplierInput.value);
                    if (value < 1) {
                         value = 1;
-                      transitionMultiplierInput.value = 1;
-                   }
+                       transitionMultiplierInput.value = 1;
+                    }
                      if (value > 10) {
-                       value = 10;
+                         value = 10;
                         transitionMultiplierInput.value = 10;
                    }
-                   transitionMultiplierSlider.value = value;
+                  transitionMultiplierSlider.value = value;
                    transitionMultiplier = value;
-                   localStorage.setItem('transitionMultiplier', transitionMultiplier);
-           });
+                    localStorage.setItem('transitionMultiplier', transitionMultiplier);
+            });
            quadraticAInput.addEventListener('change', () => {
                 quadraticA = parseFloat(quadraticAInput.value);
-               localStorage.setItem('quadraticA', quadraticA);
+                 localStorage.setItem('quadraticA', quadraticA);
             });
-           quadraticBInput.addEventListener('change', () => {
-               quadraticB = parseFloat(quadraticBInput.value);
-                 localStorage.setItem('quadraticB', quadraticB);
+             quadraticBInput.addEventListener('change', () => {
+                quadraticB = parseFloat(quadraticBInput.value);
+               localStorage.setItem('quadraticB', quadraticB);
             });
            quadraticCInput.addEventListener('change', () => {
-               quadraticC = parseFloat(quadraticCInput.value);
+                quadraticC = parseFloat(quadraticCInput.value);
                  localStorage.setItem('quadraticC', quadraticC);
-           });
-           resetSettingsButton.addEventListener('click', () => {
-                Cookies.remove('timeNodes');
-                timeNodes = [];
-               breakTimeMultiplier = 1;
-                 transitionMultiplier = 5;
-                quadraticA = 0.01;
-                quadraticB = 0.1;
-                 quadraticC = 1;
-                transitionMultiplierInput.value = transitionMultiplier;
-               transitionMultiplierSlider.value = transitionMultiplier;
-               breakMultiplierInput.value = breakTimeMultiplier;
-                breakMultiplierSlider.value = breakTimeMultiplier;
-                quadraticAInput.value = quadraticA;
-                 quadraticBInput.value = quadraticB;
-                quadraticCInput.value = quadraticC;
-                 renderTimeNodes();
-                renderSchedule();
-                 updateNodeDisplay();
-                 updateCurrentTime();
             });
-            transitionMultiplierInput.value = transitionMultiplier;
+            function storeTimeNodes(){
+                const today = new Date();
+                  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                 const nodesToStore = timeNodes.map(item => { return { ...item } });
+                Cookies.set('timeNodes', JSON.stringify({ [todayKey]: nodesToStore }), { expires: 365 });
+            }
+             function getStoredTimeNodes(){
+               const today = new Date();
+                const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+               const storedNodes = Cookies.get('timeNodes');
+                if (storedNodes){
+                     try {
+                          const parsedNodes = JSON.parse(storedNodes)
+                          if(parsedNodes[todayKey]){
+                            return parsedNodes[todayKey];
+                        }
+                     } catch(e){
+                           console.log(e)
+                       }
+                  }
+                 return [];
+            }
+            addNodeConfirmButton.addEventListener('click', () => {
+                if (newNodeTime) {
+                   const newTimeNode = {
+                      name: nodeNameInput.value || 'New Node',
+                      time: newNodeTime,
+                      reminder: reminderTimeInput.value,
+                  };
+                     timeNodes.push(newTimeNode);
+                    storeTimeNodes();
+                     renderTimeNodes();
+                    renderSchedule();
+                     updateNodeDisplay();
+                }
+                addTimeNodeDrawer.classList.remove('active');
+                isSettingNewNode = false;
+                 dayProgressContainer.removeEventListener('mousemove', trackMouseTime);
+                 dayProgressContainer.removeEventListener('click', confirmNewNode);
+            });
+             transitionMultiplierInput.value = transitionMultiplier;
             transitionMultiplierSlider.value = transitionMultiplier;
-            breakMultiplierInput.value = breakTimeMultiplier;
+             breakMultiplierInput.value = breakTimeMultiplier;
             breakMultiplierSlider.value = breakTimeMultiplier;
-           quadraticAInput.value = quadraticA;
-           quadraticBInput.value = quadraticB;
+            quadraticAInput.value = quadraticA;
+            quadraticBInput.value = quadraticB;
             quadraticCInput.value = quadraticC;
             renderTimeNodes();
              renderSchedule();
             updateCurrentTime();
-           setInterval(updateCurrentTime, 1000);
+            setInterval(updateCurrentTime, 1000);
             updateDayProgress();
-             displaySleepTime();
-           focusDurationDisplay.textContent = focusDurationInput.value;
-           breakDurationDisplay.textContent = breakDurationInput.value;
-             pauseButton.textContent = '暂停';
-        });
+            displaySleepTime();
+             focusDurationDisplay.textContent = focusDurationInput.value;
+             breakDurationDisplay.textContent = breakDurationInput.value;
+            pauseButton.textContent = '暂停';
+       });
     </script>
 </body>
 </html>
